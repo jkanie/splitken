@@ -131,6 +131,24 @@ test('groups and pending changes survive a restart', async () => {
   expect(store.values.get(GroupBook.storageKey(book.meta.id))).toContain('"pending":[]');
 });
 
+test('a member name already in the group is refused, and nothing changes', async () => {
+  const book = await (await device()).create('Trip', 'CAD', ['Ana', 'Ben']);
+  await expect(book.addMember(' ana ')).rejects.toMatchObject({
+    code: 'bad_member',
+    message: '"ana" is already a member.',
+  });
+  expect(book.pending).toHaveLength(0);
+  const di = await book.addMember('Di');
+  await expect(book.addMember('DI')).rejects.toBeInstanceOf(SplitError);
+  expect(book.state.members.map((m) => m.name)).toEqual(['Ana', 'Ben', 'Di']);
+  expect(di.id.startsWith(`${book.clientId}-`)).toBe(true);
+  // The server refuses 2 founders with 1 name in the same way.
+  await expect((await device()).create('Flat', 'CAD', ['Ana', 'ANA'])).rejects.toMatchObject({
+    code: 'bad_member',
+    message: '"ANA" is listed twice. Each member needs a name of their own.',
+  });
+});
+
 test('making a group with no network says so', async () => {
   const a = await device();
   server.online = false;

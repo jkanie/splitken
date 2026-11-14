@@ -146,6 +146,7 @@ CI runs all 4 on every push, with a PostgreSQL 16 service for the server.
   group. There are no accounts. Share it only with the group.
 - Changes reach other devices on sync, not live.
 - Release builds are signed with debug keys until ROADMAP item 6.
+- Each member of a group has a name of their own, case aside (Ana and ana are 1 name). The server checks the founders, the apps check a member they add. 2 devices that add the same new name offline still end up with 2 members of that name.
 - 1 currency per group. Amounts are at most 10,000,000.00, a group has at
   most 50 members, a sync carries at most 500 operations.
 - Deleting an expense has no undo yet.

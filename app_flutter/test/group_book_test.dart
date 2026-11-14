@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:splitken/src/api_client.dart';
 import 'package:splitken/src/group_book.dart';
 import 'package:splitken/src/key_value_store.dart';
 import 'package:splitken/src/library.dart';
@@ -144,6 +145,36 @@ void main() {
     server.online = true;
     expect(await reloaded.sync(), isTrue);
     expect(store.values[GroupBook.storageKey(book.meta.id)], contains('"pending":[]'));
+  });
+
+  test('a member name already in the group is refused, and nothing changes', () async {
+    final book = await (await device()).create('Trip', 'CAD', ['Ana', 'Ben']);
+    await expectLater(
+      book.addMember(' ana '),
+      throwsA(
+        isA<SplitError>()
+            .having((e) => e.code, 'code', 'bad_member')
+            .having((e) => e.message, 'message', '"ana" is already a member.'),
+      ),
+    );
+    expect(book.pending, isEmpty);
+    final di = await book.addMember('Di');
+    await expectLater(book.addMember('DI'), throwsA(isA<SplitError>()));
+    expect(book.state.members.map((m) => m.name), ['Ana', 'Ben', 'Di']);
+    expect(di.id, startsWith('${book.clientId}-'));
+    // The server refuses 2 founders with 1 name in the same way.
+    await expectLater(
+      (await device()).create('Flat', 'CAD', ['Ana', 'ANA']),
+      throwsA(
+        isA<RefusedError>()
+            .having((e) => e.code, 'code', 'bad_member')
+            .having(
+              (e) => e.message,
+              'message',
+              '"ANA" is listed twice. Each member needs a name of their own.',
+            ),
+      ),
+    );
   });
 
   test('making a group with no network says so', () async {

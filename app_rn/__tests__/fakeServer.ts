@@ -40,6 +40,19 @@ export class FakeServer {
 
   private handle(method: string, path: string, body: any): Reply {
     if (method === 'POST' && path === '/v1/groups') {
+      const names = (body.members as string[]).map((name) => name.trim());
+      const twice = names.find(
+        (name, i) => names.findIndex((n) => n.toLowerCase() === name.toLowerCase()) !== i,
+      );
+      if (twice !== undefined) {
+        return {
+          status: 422,
+          body: {
+            error: 'bad_member',
+            message: `"${twice}" is listed twice. Each member needs a name of their own.`,
+          },
+        };
+      }
       const id = `g${this.nextId++}`;
       const group = {
         id,

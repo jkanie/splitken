@@ -57,6 +57,18 @@ Handler buildApi(Store store, {String Function()? newId}) {
         }
         founders.add(Member('m${i + 1}', m.trim()));
       }
+      // 2 founders with 1 name could not be told apart in balances or
+      // settle-up lines. Case does not count: Ana and ana are 1 name.
+      final names = <String>{};
+      for (final f in founders) {
+        if (!names.add(f.name.toLowerCase())) {
+          throw _ApiError(
+            422,
+            'bad_member',
+            '"${f.name}" is listed twice. Each member needs a name of their own.',
+          );
+        }
+      }
       final group = Group(
         id: makeId(),
         name: name.trim(),

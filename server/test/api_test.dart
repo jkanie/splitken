@@ -86,6 +86,19 @@ void main() {
       final (status, json) = await api('POST', '/v1/groups', body);
       expect((status, json['error']), (422, code), reason: '$body');
     }
+    final (dupStatus, dupJson) = await api('POST', '/v1/groups', {
+      'name': 'X',
+      'currency': 'CAD',
+      'members': ['Ana', 'Ben', ' ana '],
+    });
+    expect(
+      (dupStatus, dupJson['error'], dupJson['message']),
+      (
+        422,
+        'bad_member',
+        '"ana" is listed twice. Each member needs a name of their own.',
+      ),
+    );
     final (badStatus, badJson) = await api('POST', '/v1/groups', '[1');
     expect((badStatus, badJson['error']), (400, 'bad_json'));
   });

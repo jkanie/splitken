@@ -92,6 +92,10 @@ class GroupBook extends ChangeNotifier {
     if (trimmed.isEmpty || trimmed.length > 60) {
       throw SplitError('bad_member', 'A name is 1 to 60 characters.');
     }
+    // As the server refuses for founders: Ana and ana are 1 name.
+    if (state.members.any((m) => m.name.toLowerCase() == trimmed.toLowerCase())) {
+      throw SplitError('bad_member', '"$trimmed" is already a member.');
+    }
     final member = Member('$clientId-${randomId(6)}', trimmed);
     await _add(_op(OpKind.member, member: member));
     return member;

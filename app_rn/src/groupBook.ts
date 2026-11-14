@@ -108,6 +108,10 @@ export class GroupBook {
     if (trimmed.length === 0 || trimmed.length > 60) {
       throw new SplitError('bad_member', 'A name is 1 to 60 characters.');
     }
+    // As the server refuses for founders: Ana and ana are 1 name.
+    if (this.state.members.some((m) => m.name.toLowerCase() === trimmed.toLowerCase())) {
+      throw new SplitError('bad_member', `"${trimmed}" is already a member.`);
+    }
     const member = { id: `${this.clientId}-${randomId(6)}`, name: trimmed };
     await this.add(this.op('member', { member }));
     return member;
