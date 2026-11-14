@@ -1,0 +1,21 @@
+# Dart and Flutter
+.dart_tool/
+.packages
+build/
+coverage/
+*.iml
+.idea/
+.flutter-plugins-dependencies
+
+# Node and Expo
+node_modules/
+.expo/
+dist/
+web-build/
+*.tsbuildinfo
+
+# Local settings
+.env
+.env.*
+local.properties
+.DS_Store

@@ -1,0 +1,1355 @@
+{
+  "about": "Cases both copies of the money rules must pass: core/ (Dart, used by the server and the Flutter app) and app_rn/src/core (TypeScript). Amounts are in cents. Every fold case must give the same result for any order of its ops.",
+  "version": 1,
+  "split": [
+    {
+      "name": "equal 10.00 among 3 gives the extra cent to the 1st",
+      "expense": {
+        "id": "e1",
+        "description": "Pizza",
+        "amountCents": 1000,
+        "paidBy": "a",
+        "participants": [
+          "a",
+          "b",
+          "c"
+        ],
+        "method": "equal",
+        "weights": [],
+        "isTransfer": false
+      },
+      "owed": [
+        334,
+        333,
+        333
+      ]
+    },
+    {
+      "name": "equal 1.00 among 6 gives 4 extra cents in order",
+      "expense": {
+        "id": "e1",
+        "description": "Snacks",
+        "amountCents": 100,
+        "paidBy": "a",
+        "participants": [
+          "a",
+          "b",
+          "c",
+          "d",
+          "e",
+          "f"
+        ],
+        "method": "equal",
+        "weights": [],
+        "isTransfer": false
+      },
+      "owed": [
+        17,
+        17,
+        17,
+        17,
+        16,
+        16
+      ]
+    },
+    {
+      "name": "equal 0.01 among 3",
+      "expense": {
+        "id": "e1",
+        "description": "Gum",
+        "amountCents": 1,
+        "paidBy": "a",
+        "participants": [
+          "a",
+          "b",
+          "c"
+        ],
+        "method": "equal",
+        "weights": [],
+        "isTransfer": false
+      },
+      "owed": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "equal at the largest amount among 7",
+      "expense": {
+        "id": "e1",
+        "description": "Boat",
+        "amountCents": 1000000000,
+        "paidBy": "a",
+        "participants": [
+          "a",
+          "b",
+          "c",
+          "d",
+          "e",
+          "f",
+          "g"
+        ],
+        "method": "equal",
+        "weights": [],
+        "isTransfer": false
+      },
+      "owed": [
+        142857143,
+        142857143,
+        142857143,
+        142857143,
+        142857143,
+        142857143,
+        142857142
+      ]
+    },
+    {
+      "name": "shares 2:1:1 that divide evenly",
+      "expense": {
+        "id": "e1",
+        "description": "Cabin",
+        "amountCents": 1000,
+        "paidBy": "a",
+        "participants": [
+          "a",
+          "b",
+          "c"
+        ],
+        "method": "shares",
+        "weights": [
+          2,
+          1,
+          1
+        ],
+        "isTransfer": false
+      },
+      "owed": [
+        500,
+        250,
+        250
+      ]
+    },
+    {
+      "name": "shares 2:1:1 with 1 cent left goes to the largest remainder",
+      "expense": {
+        "id": "e1",
+        "description": "Cabin",
+        "amountCents": 1001,
+        "paidBy": "a",
+        "participants": [
+          "a",
+          "b",
+          "c"
+        ],
+        "method": "shares",
+        "weights": [
+          2,
+          1,
+          1
+        ],
+        "isTransfer": false
+      },
+      "owed": [
+        501,
+        250,
+        250
+      ]
+    },
+    {
+      "name": "shares 1:1:1 behave as equal",
+      "expense": {
+        "id": "e1",
+        "description": "Taxi",
+        "amountCents": 100,
+        "paidBy": "a",
+        "participants": [
+          "a",
+          "b",
+          "c"
+        ],
+        "method": "shares",
+        "weights": [
+          1,
+          1,
+          1
+        ],
+        "isTransfer": false
+      },
+      "owed": [
+        34,
+        33,
+        33
+      ]
+    },
+    {
+      "name": "shares at the largest amount and share total",
+      "expense": {
+        "id": "e1",
+        "description": "Lease",
+        "amountCents": 1000000000,
+        "paidBy": "a",
+        "participants": [
+          "a",
+          "b"
+        ],
+        "method": "shares",
+        "weights": [
+          999999,
+          1
+        ],
+        "isTransfer": false
+      },
+      "owed": [
+        999999000,
+        1000
+      ]
+    },
+    {
+      "name": "percent 33.33/33.33/33.34 of 9.99",
+      "expense": {
+        "id": "e1",
+        "description": "Wine",
+        "amountCents": 999,
+        "paidBy": "a",
+        "participants": [
+          "a",
+          "b",
+          "c"
+        ],
+        "method": "percent",
+        "weights": [
+          3333,
+          3333,
+          3334
+        ],
+        "isTransfer": false
+      },
+      "owed": [
+        333,
+        333,
+        333
+      ]
+    },
+    {
+      "name": "percent 50/50",
+      "expense": {
+        "id": "e1",
+        "description": "Hotel",
+        "amountCents": 10000,
+        "paidBy": "a",
+        "participants": [
+          "a",
+          "b"
+        ],
+        "method": "percent",
+        "weights": [
+          5000,
+          5000
+        ],
+        "isTransfer": false
+      },
+      "owed": [
+        5000,
+        5000
+      ]
+    },
+    {
+      "name": "percent with a 0% participant",
+      "expense": {
+        "id": "e1",
+        "description": "Fuel",
+        "amountCents": 777,
+        "paidBy": "a",
+        "participants": [
+          "a",
+          "b",
+          "c"
+        ],
+        "method": "percent",
+        "weights": [
+          5000,
+          0,
+          5000
+        ],
+        "isTransfer": false
+      },
+      "owed": [
+        389,
+        0,
+        388
+      ]
+    },
+    {
+      "name": "exact parts",
+      "expense": {
+        "id": "e1",
+        "description": "Tickets",
+        "amountCents": 1500,
+        "paidBy": "a",
+        "participants": [
+          "a",
+          "b"
+        ],
+        "method": "exact",
+        "weights": [
+          1000,
+          500
+        ],
+        "isTransfer": false
+      },
+      "owed": [
+        1000,
+        500
+      ]
+    },
+    {
+      "name": "exact parts with a 0",
+      "expense": {
+        "id": "e1",
+        "description": "Tickets",
+        "amountCents": 1500,
+        "paidBy": "a",
+        "participants": [
+          "a",
+          "b"
+        ],
+        "method": "exact",
+        "weights": [
+          1500,
+          0
+        ],
+        "isTransfer": false
+      },
+      "owed": [
+        1500,
+        0
+      ]
+    },
+    {
+      "name": "exact parts that miss the total",
+      "expense": {
+        "id": "e1",
+        "description": "Tickets",
+        "amountCents": 1500,
+        "paidBy": "a",
+        "participants": [
+          "a",
+          "b"
+        ],
+        "method": "exact",
+        "weights": [
+          1000,
+          499
+        ],
+        "isTransfer": false
+      },
+      "error": "bad_split"
+    },
+    {
+      "name": "exact part below 0",
+      "expense": {
+        "id": "e1",
+        "description": "Tickets",
+        "amountCents": 1500,
+        "paidBy": "a",
+        "participants": [
+          "a",
+          "b"
+        ],
+        "method": "exact",
+        "weights": [
+          1600,
+          -100
+        ],
+        "isTransfer": false
+      },
+      "error": "bad_split"
+    },
+    {
+      "name": "percent that adds up to 99.99%",
+      "expense": {
+        "id": "e1",
+        "description": "Wine",
+        "amountCents": 999,
+        "paidBy": "a",
+        "participants": [
+          "a",
+          "b",
+          "c"
+        ],
+        "method": "percent",
+        "weights": [
+          3333,
+          3333,
+          3333
+        ],
+        "isTransfer": false
+      },
+      "error": "bad_split"
+    },
+    {
+      "name": "a share of 0",
+      "expense": {
+        "id": "e1",
+        "description": "Cabin",
+        "amountCents": 1000,
+        "paidBy": "a",
+        "participants": [
+          "a",
+          "b"
+        ],
+        "method": "shares",
+        "weights": [
+          1,
+          0
+        ],
+        "isTransfer": false
+      },
+      "error": "bad_split"
+    },
+    {
+      "name": "shares above the share total limit",
+      "expense": {
+        "id": "e1",
+        "description": "Cabin",
+        "amountCents": 1000,
+        "paidBy": "a",
+        "participants": [
+          "a",
+          "b"
+        ],
+        "method": "shares",
+        "weights": [
+          1000000,
+          1
+        ],
+        "isTransfer": false
+      },
+      "error": "bad_split"
+    },
+    {
+      "name": "equal with weights",
+      "expense": {
+        "id": "e1",
+        "description": "Pizza",
+        "amountCents": 1000,
+        "paidBy": "a",
+        "participants": [
+          "a",
+          "b"
+        ],
+        "method": "equal",
+        "weights": [
+          1,
+          1
+        ],
+        "isTransfer": false
+      },
+      "error": "bad_split"
+    },
+    {
+      "name": "1 weight for 2 participants",
+      "expense": {
+        "id": "e1",
+        "description": "Cabin",
+        "amountCents": 1000,
+        "paidBy": "a",
+        "participants": [
+          "a",
+          "b"
+        ],
+        "method": "shares",
+        "weights": [
+          1
+        ],
+        "isTransfer": false
+      },
+      "error": "bad_split"
+    }
+  ],
+  "balances": [
+    {
+      "name": "1 payer, equal among 3",
+      "members": [
+        {
+          "id": "a",
+          "name": "Ana"
+        },
+        {
+          "id": "b",
+          "name": "Ben"
+        },
+        {
+          "id": "c",
+          "name": "Cai"
+        }
+      ],
+      "expenses": [
+        {
+          "id": "e1",
+          "description": "Groceries",
+          "amountCents": 9000,
+          "paidBy": "a",
+          "participants": [
+            "a",
+            "b",
+            "c"
+          ],
+          "method": "equal",
+          "weights": [],
+          "isTransfer": false
+        }
+      ],
+      "net": {
+        "a": 6000,
+        "b": -3000,
+        "c": -3000
+      },
+      "settle": [
+        {
+          "from": "b",
+          "to": "a",
+          "amountCents": 3000
+        },
+        {
+          "from": "c",
+          "to": "a",
+          "amountCents": 3000
+        }
+      ]
+    },
+    {
+      "name": "2 payers",
+      "members": [
+        {
+          "id": "a",
+          "name": "Ana"
+        },
+        {
+          "id": "b",
+          "name": "Ben"
+        },
+        {
+          "id": "c",
+          "name": "Cai"
+        }
+      ],
+      "expenses": [
+        {
+          "id": "e1",
+          "description": "Dinner",
+          "amountCents": 3000,
+          "paidBy": "a",
+          "participants": [
+            "a",
+            "b"
+          ],
+          "method": "equal",
+          "weights": [],
+          "isTransfer": false
+        },
+        {
+          "id": "e2",
+          "description": "Drinks",
+          "amountCents": 1200,
+          "paidBy": "b",
+          "participants": [
+            "a",
+            "b",
+            "c"
+          ],
+          "method": "equal",
+          "weights": [],
+          "isTransfer": false
+        }
+      ],
+      "net": {
+        "a": 1100,
+        "b": -700,
+        "c": -400
+      },
+      "settle": [
+        {
+          "from": "b",
+          "to": "a",
+          "amountCents": 700
+        },
+        {
+          "from": "c",
+          "to": "a",
+          "amountCents": 400
+        }
+      ]
+    },
+    {
+      "name": "a transfer pays a debt back",
+      "members": [
+        {
+          "id": "a",
+          "name": "Ana"
+        },
+        {
+          "id": "b",
+          "name": "Ben"
+        },
+        {
+          "id": "c",
+          "name": "Cai"
+        }
+      ],
+      "expenses": [
+        {
+          "id": "e1",
+          "description": "Groceries",
+          "amountCents": 9000,
+          "paidBy": "a",
+          "participants": [
+            "a",
+            "b",
+            "c"
+          ],
+          "method": "equal",
+          "weights": [],
+          "isTransfer": false
+        },
+        {
+          "id": "t1",
+          "description": "Paid back",
+          "amountCents": 3000,
+          "paidBy": "b",
+          "participants": [
+            "a"
+          ],
+          "method": "exact",
+          "weights": [
+            3000
+          ],
+          "isTransfer": true
+        }
+      ],
+      "net": {
+        "a": 3000,
+        "b": 0,
+        "c": -3000
+      },
+      "settle": [
+        {
+          "from": "c",
+          "to": "a",
+          "amountCents": 3000
+        }
+      ]
+    },
+    {
+      "name": "4 members with shares",
+      "members": [
+        {
+          "id": "a",
+          "name": "Ana"
+        },
+        {
+          "id": "b",
+          "name": "Ben"
+        },
+        {
+          "id": "c",
+          "name": "Cai"
+        },
+        {
+          "id": "d",
+          "name": "Dev"
+        }
+      ],
+      "expenses": [
+        {
+          "id": "e1",
+          "description": "Lunch",
+          "amountCents": 1000,
+          "paidBy": "a",
+          "participants": [
+            "a",
+            "b",
+            "c",
+            "d"
+          ],
+          "method": "equal",
+          "weights": [],
+          "isTransfer": false
+        },
+        {
+          "id": "e2",
+          "description": "Taxi",
+          "amountCents": 600,
+          "paidBy": "b",
+          "participants": [
+            "c",
+            "d"
+          ],
+          "method": "shares",
+          "weights": [
+            1,
+            2
+          ],
+          "isTransfer": false
+        }
+      ],
+      "net": {
+        "a": 750,
+        "b": 350,
+        "c": -450,
+        "d": -650
+      },
+      "settle": [
+        {
+          "from": "d",
+          "to": "a",
+          "amountCents": 650
+        },
+        {
+          "from": "c",
+          "to": "b",
+          "amountCents": 350
+        },
+        {
+          "from": "c",
+          "to": "a",
+          "amountCents": 100
+        }
+      ]
+    },
+    {
+      "name": "a payer who only paid for themself",
+      "members": [
+        {
+          "id": "a",
+          "name": "Ana"
+        },
+        {
+          "id": "b",
+          "name": "Ben"
+        },
+        {
+          "id": "c",
+          "name": "Cai"
+        }
+      ],
+      "expenses": [
+        {
+          "id": "e1",
+          "description": "Coffee",
+          "amountCents": 500,
+          "paidBy": "a",
+          "participants": [
+            "a"
+          ],
+          "method": "exact",
+          "weights": [
+            500
+          ],
+          "isTransfer": false
+        }
+      ],
+      "net": {
+        "a": 0,
+        "b": 0,
+        "c": 0
+      },
+      "settle": []
+    },
+    {
+      "name": "no expenses",
+      "members": [
+        {
+          "id": "a",
+          "name": "Ana"
+        },
+        {
+          "id": "b",
+          "name": "Ben"
+        },
+        {
+          "id": "c",
+          "name": "Cai"
+        }
+      ],
+      "expenses": [],
+      "net": {
+        "a": 0,
+        "b": 0,
+        "c": 0
+      },
+      "settle": []
+    },
+    {
+      "name": "an unknown participant",
+      "members": [
+        {
+          "id": "a",
+          "name": "Ana"
+        },
+        {
+          "id": "b",
+          "name": "Ben"
+        },
+        {
+          "id": "c",
+          "name": "Cai"
+        }
+      ],
+      "expenses": [
+        {
+          "id": "e1",
+          "description": "Dinner",
+          "amountCents": 3000,
+          "paidBy": "a",
+          "participants": [
+            "a",
+            "z"
+          ],
+          "method": "equal",
+          "weights": [],
+          "isTransfer": false
+        }
+      ],
+      "error": "unknown_member"
+    }
+  ],
+  "fold": [
+    {
+      "name": "an edit and a delete from 2 devices",
+      "founders": [
+        {
+          "id": "a",
+          "name": "Ana"
+        },
+        {
+          "id": "b",
+          "name": "Ben"
+        }
+      ],
+      "ops": [
+        {
+          "opId": "o1",
+          "clientId": "phone-1",
+          "lamport": 1,
+          "kind": "expense",
+          "expense": {
+            "id": "x1",
+            "description": "Rent",
+            "amountCents": 1000,
+            "paidBy": "a",
+            "participants": [
+              "a",
+              "b"
+            ],
+            "method": "equal",
+            "weights": [],
+            "isTransfer": false
+          }
+        },
+        {
+          "opId": "o2",
+          "clientId": "phone-2",
+          "lamport": 1,
+          "kind": "expense",
+          "expense": {
+            "id": "x2",
+            "description": "Power",
+            "amountCents": 500,
+            "paidBy": "b",
+            "participants": [
+              "a",
+              "b"
+            ],
+            "method": "equal",
+            "weights": [],
+            "isTransfer": false
+          }
+        },
+        {
+          "opId": "o3",
+          "clientId": "phone-2",
+          "lamport": 2,
+          "kind": "expense",
+          "expense": {
+            "id": "x1",
+            "description": "Rent",
+            "amountCents": 2000,
+            "paidBy": "a",
+            "participants": [
+              "a",
+              "b"
+            ],
+            "method": "equal",
+            "weights": [],
+            "isTransfer": false
+          }
+        },
+        {
+          "opId": "o4",
+          "clientId": "phone-1",
+          "lamport": 2,
+          "kind": "delete",
+          "expenseId": "x2"
+        }
+      ],
+      "members": [
+        {
+          "id": "a",
+          "name": "Ana"
+        },
+        {
+          "id": "b",
+          "name": "Ben"
+        }
+      ],
+      "expenseIds": [
+        "x1"
+      ],
+      "amounts": [
+        2000
+      ],
+      "net": {
+        "a": 1000,
+        "b": -1000
+      }
+    },
+    {
+      "name": "2 edits at the same Lamport value: the higher client id wins",
+      "founders": [
+        {
+          "id": "a",
+          "name": "Ana"
+        },
+        {
+          "id": "b",
+          "name": "Ben"
+        }
+      ],
+      "ops": [
+        {
+          "opId": "o1",
+          "clientId": "phone-1",
+          "lamport": 1,
+          "kind": "expense",
+          "expense": {
+            "id": "x1",
+            "description": "Rent",
+            "amountCents": 1000,
+            "paidBy": "a",
+            "participants": [
+              "a",
+              "b"
+            ],
+            "method": "equal",
+            "weights": [],
+            "isTransfer": false
+          }
+        },
+        {
+          "opId": "o2",
+          "clientId": "phone-1",
+          "lamport": 2,
+          "kind": "expense",
+          "expense": {
+            "id": "x1",
+            "description": "Rent",
+            "amountCents": 1500,
+            "paidBy": "a",
+            "participants": [
+              "a",
+              "b"
+            ],
+            "method": "equal",
+            "weights": [],
+            "isTransfer": false
+          }
+        },
+        {
+          "opId": "o3",
+          "clientId": "phone-2",
+          "lamport": 2,
+          "kind": "expense",
+          "expense": {
+            "id": "x1",
+            "description": "Rent",
+            "amountCents": 1200,
+            "paidBy": "a",
+            "participants": [
+              "a",
+              "b"
+            ],
+            "method": "equal",
+            "weights": [],
+            "isTransfer": false
+          }
+        }
+      ],
+      "members": [
+        {
+          "id": "a",
+          "name": "Ana"
+        },
+        {
+          "id": "b",
+          "name": "Ben"
+        }
+      ],
+      "expenseIds": [
+        "x1"
+      ],
+      "amounts": [
+        1200
+      ],
+      "net": {
+        "a": 600,
+        "b": -600
+      }
+    },
+    {
+      "name": "an expense added again after a delete",
+      "founders": [
+        {
+          "id": "a",
+          "name": "Ana"
+        },
+        {
+          "id": "b",
+          "name": "Ben"
+        }
+      ],
+      "ops": [
+        {
+          "opId": "o1",
+          "clientId": "phone-1",
+          "lamport": 1,
+          "kind": "expense",
+          "expense": {
+            "id": "x1",
+            "description": "Bus",
+            "amountCents": 300,
+            "paidBy": "a",
+            "participants": [
+              "a",
+              "b"
+            ],
+            "method": "equal",
+            "weights": [],
+            "isTransfer": false
+          }
+        },
+        {
+          "opId": "o2",
+          "clientId": "phone-2",
+          "lamport": 2,
+          "kind": "delete",
+          "expenseId": "x1"
+        },
+        {
+          "opId": "o3",
+          "clientId": "phone-1",
+          "lamport": 3,
+          "kind": "expense",
+          "expense": {
+            "id": "x1",
+            "description": "Bus",
+            "amountCents": 400,
+            "paidBy": "a",
+            "participants": [
+              "a",
+              "b"
+            ],
+            "method": "equal",
+            "weights": [],
+            "isTransfer": false
+          }
+        }
+      ],
+      "members": [
+        {
+          "id": "a",
+          "name": "Ana"
+        },
+        {
+          "id": "b",
+          "name": "Ben"
+        }
+      ],
+      "expenseIds": [
+        "x1"
+      ],
+      "amounts": [
+        400
+      ],
+      "net": {
+        "a": 200,
+        "b": -200
+      }
+    },
+    {
+      "name": "members added offline, 1 renamed",
+      "founders": [
+        {
+          "id": "a",
+          "name": "Ana"
+        },
+        {
+          "id": "b",
+          "name": "Ben"
+        }
+      ],
+      "ops": [
+        {
+          "opId": "o1",
+          "clientId": "phone-1",
+          "lamport": 1,
+          "kind": "member",
+          "member": {
+            "id": "m3",
+            "name": "Cam"
+          }
+        },
+        {
+          "opId": "o2",
+          "clientId": "phone-2",
+          "lamport": 1,
+          "kind": "member",
+          "member": {
+            "id": "m4",
+            "name": "Dee"
+          }
+        },
+        {
+          "opId": "o3",
+          "clientId": "phone-2",
+          "lamport": 2,
+          "kind": "member",
+          "member": {
+            "id": "m3",
+            "name": "Cameron"
+          }
+        },
+        {
+          "opId": "o4",
+          "clientId": "phone-1",
+          "lamport": 3,
+          "kind": "expense",
+          "expense": {
+            "id": "x1",
+            "description": "Kayaks",
+            "amountCents": 900,
+            "paidBy": "m3",
+            "participants": [
+              "a",
+              "m3",
+              "m4"
+            ],
+            "method": "equal",
+            "weights": [],
+            "isTransfer": false
+          }
+        }
+      ],
+      "members": [
+        {
+          "id": "a",
+          "name": "Ana"
+        },
+        {
+          "id": "b",
+          "name": "Ben"
+        },
+        {
+          "id": "m3",
+          "name": "Cameron"
+        },
+        {
+          "id": "m4",
+          "name": "Dee"
+        }
+      ],
+      "expenseIds": [
+        "x1"
+      ],
+      "amounts": [
+        900
+      ],
+      "net": {
+        "a": -300,
+        "b": 0,
+        "m3": 600,
+        "m4": -300
+      }
+    },
+    {
+      "name": "the same operation received twice",
+      "founders": [
+        {
+          "id": "a",
+          "name": "Ana"
+        },
+        {
+          "id": "b",
+          "name": "Ben"
+        }
+      ],
+      "ops": [
+        {
+          "opId": "o1",
+          "clientId": "phone-1",
+          "lamport": 1,
+          "kind": "expense",
+          "expense": {
+            "id": "x1",
+            "description": "Rent",
+            "amountCents": 1000,
+            "paidBy": "a",
+            "participants": [
+              "a",
+              "b"
+            ],
+            "method": "equal",
+            "weights": [],
+            "isTransfer": false
+          }
+        },
+        {
+          "opId": "o1",
+          "clientId": "phone-1",
+          "lamport": 1,
+          "kind": "expense",
+          "expense": {
+            "id": "x1",
+            "description": "Rent",
+            "amountCents": 1000,
+            "paidBy": "a",
+            "participants": [
+              "a",
+              "b"
+            ],
+            "method": "equal",
+            "weights": [],
+            "isTransfer": false
+          }
+        }
+      ],
+      "members": [
+        {
+          "id": "a",
+          "name": "Ana"
+        },
+        {
+          "id": "b",
+          "name": "Ben"
+        }
+      ],
+      "expenseIds": [
+        "x1"
+      ],
+      "amounts": [
+        1000
+      ],
+      "net": {
+        "a": 500,
+        "b": -500
+      }
+    }
+  ],
+  "parse": [
+    {
+      "text": "12",
+      "cents": 1200
+    },
+    {
+      "text": "12.5",
+      "cents": 1250
+    },
+    {
+      "text": "12.50",
+      "cents": 1250
+    },
+    {
+      "text": " 7.05 ",
+      "cents": 705
+    },
+    {
+      "text": "0.01",
+      "cents": 1
+    },
+    {
+      "text": "10000000",
+      "cents": 1000000000
+    },
+    {
+      "text": "10000000.01",
+      "error": "bad_amount"
+    },
+    {
+      "text": "100000000",
+      "error": "bad_amount"
+    },
+    {
+      "text": "0",
+      "error": "bad_amount"
+    },
+    {
+      "text": "0.00",
+      "error": "bad_amount"
+    },
+    {
+      "text": "-1",
+      "error": "bad_amount"
+    },
+    {
+      "text": "1,5",
+      "error": "bad_amount"
+    },
+    {
+      "text": "1.234",
+      "error": "bad_amount"
+    },
+    {
+      "text": "",
+      "error": "bad_amount"
+    },
+    {
+      "text": ".5",
+      "error": "bad_amount"
+    },
+    {
+      "text": "abc",
+      "error": "bad_amount"
+    },
+    {
+      "text": "1e3",
+      "error": "bad_amount"
+    }
+  ],
+  "format": [
+    {
+      "cents": 123456,
+      "text": "1234.56"
+    },
+    {
+      "cents": 5,
+      "text": "0.05"
+    },
+    {
+      "cents": -5,
+      "text": "-0.05"
+    },
+    {
+      "cents": 0,
+      "text": "0.00"
+    },
+    {
+      "cents": 100,
+      "text": "1.00"
+    },
+    {
+      "cents": 1000000000,
+      "text": "10000000.00"
+    }
+  ]
+}

@@ -1,0 +1,223 @@
+openapi: 3.1.0
+info:
+  title: splitken sync API
+  version: 0.1.0
+  description: >
+    Groups, their operation log, balances. Both apps talk to this API. The
+    group id is 16 random bytes in base64url and works as a capability:
+    anyone who has it can read and write the group.
+  license:
+    name: MIT
+    identifier: MIT
+servers:
+  - url: http://localhost:8080
+paths:
+  /health:
+    get:
+      summary: Liveness check
+      responses:
+        '200':
+          description: The server is up.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status: { const: ok }
+  /v1/groups:
+    post:
+      summary: Make a group
+      description: The members get the ids m1, m2 and so on, in the order given.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, currency, members]
+              properties:
+                name: { type: string, minLength: 1, maxLength: 80 }
+                currency: { type: string, pattern: '^[A-Z]{3}$' }
+                members:
+                  type: array
+                  minItems: 1
+                  maxItems: 50
+                  items: { type: string, minLength: 1, maxLength: 60 }
+      responses:
+        '201':
+          description: The group as made.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Group'
+                  - type: object
+                    required: [seq]
+                    properties:
+                      seq: { const: 0 }
+        '400': { $ref: '#/components/responses/Error' }
+        '413': { $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+  /v1/groups/{id}:
+    parameters:
+      - $ref: '#/components/parameters/GroupId'
+    get:
+      summary: Read a group
+      responses:
+        '200':
+          description: The group, its members now and its newest seq.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Group'
+                  - type: object
+                    required: [members, seq]
+                    properties:
+                      members:
+                        type: array
+                        items: { $ref: '#/components/schemas/Member' }
+                      seq: { type: integer, minimum: 0 }
+        '404': { $ref: '#/components/responses/Error' }
+  /v1/groups/{id}/sync:
+    parameters:
+      - $ref: '#/components/parameters/GroupId'
+    post:
+      summary: Send operations and get the ones after a seq
+      description: >
+        The batch is stored as 1 step or not at all. Sending an operation again
+        (same clientId and opId) stores nothing new, so a device may retry
+        freely. When 1 operation breaks a rule, the whole batch is refused and
+        the error names it in opId.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                since: { type: integer, minimum: 0, default: 0 }
+                ops:
+                  type: array
+                  maxItems: 500
+                  items: { $ref: '#/components/schemas/Op' }
+      responses:
+        '200':
+          description: The operations after since, the newest seq, how many were new.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [stored, seq, ops]
+                properties:
+                  stored: { type: integer, minimum: 0 }
+                  seq: { type: integer, minimum: 0 }
+                  ops:
+                    type: array
+                    items: { $ref: '#/components/schemas/Op' }
+        '400': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+        '413': { $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+  /v1/groups/{id}/balances:
+    parameters:
+      - $ref: '#/components/parameters/GroupId'
+    get:
+      summary: Net balances and settle-up payments
+      responses:
+        '200':
+          description: Net cents per member id (paid minus owed), and payments that clear them.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [currency, net, settle]
+                properties:
+                  currency: { type: string }
+                  net:
+                    type: object
+                    additionalProperties: { type: integer }
+                  settle:
+                    type: array
+                    items:
+                      type: object
+                      required: [from, to, amountCents]
+                      properties:
+                        from: { type: string }
+                        to: { type: string }
+                        amountCents: { type: integer, minimum: 1 }
+        '404': { $ref: '#/components/responses/Error' }
+components:
+  parameters:
+    GroupId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string }
+  responses:
+    Error:
+      description: >
+        A refused request. error is a stable code such as bad_json, not_found,
+        too_large, bad_group, bad_member, bad_sync, bad_op, bad_expense,
+        bad_split, bad_amount, bad_transfer, unknown_member, too_many_members.
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [error, message]
+            properties:
+              error: { type: string }
+              message: { type: string }
+              opId: { type: string, description: The operation that broke a rule. }
+  schemas:
+    Member:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: string, minLength: 1, maxLength: 64 }
+        name: { type: string, minLength: 1, maxLength: 60 }
+    Group:
+      type: object
+      required: [id, name, currency, founders]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        currency: { type: string }
+        founders:
+          type: array
+          items: { $ref: '#/components/schemas/Member' }
+    Expense:
+      type: object
+      required: [id, description, amountCents, paidBy, participants]
+      properties:
+        id: { type: string, minLength: 1, maxLength: 64 }
+        description: { type: string, minLength: 1, maxLength: 200 }
+        amountCents: { type: integer, minimum: 1, maximum: 1000000000 }
+        paidBy: { type: string }
+        participants:
+          type: array
+          minItems: 1
+          items: { type: string }
+        method:
+          enum: [equal, exact, shares, percent]
+          default: equal
+        weights:
+          description: 1 per participant. Cents for exact, shares for shares, basis points for percent. Empty for equal.
+          type: array
+          items: { type: integer, minimum: 0 }
+        isTransfer: { type: boolean, default: false }
+    Op:
+      type: object
+      required: [opId, clientId, lamport, kind]
+      properties:
+        opId: { type: string, minLength: 1, maxLength: 64 }
+        clientId: { type: string, minLength: 1, maxLength: 64 }
+        lamport: { type: integer, minimum: 1, maximum: 9007199254740991 }
+        kind: { enum: [member, expense, delete] }
+        member: { $ref: '#/components/schemas/Member' }
+        expense: { $ref: '#/components/schemas/Expense' }
+        expenseId: { type: string }
+        seq:
+          type: integer
+          description: Set by the server. Devices leave it out when sending.

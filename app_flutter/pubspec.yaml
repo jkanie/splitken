@@ -1,0 +1,27 @@
+name: splitken
+description: Shared expenses that work offline, the Flutter app.
+publish_to: none
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.14.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.6.0
+  material_ui: ^1.11.0
+  shared_preferences: ^2.5.6
+  splitken_core:
+    path: ../core
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+  shelf: ^1.4.3
+  splitken_server:
+    path: ../server
+
+flutter:
+  uses-material-design: true

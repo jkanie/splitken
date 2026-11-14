@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  FLUTTER_VERSION: '3.50.0'
+  NODE_VERSION: '26.13.0'
+
+jobs:
+  core-server:
+    name: Dart core and server (PostgreSQL 16)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: splitken_test
+          POSTGRES_USER: splitken
+          POSTGRES_PASSWORD: splitken-ci-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U splitken"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      SPLITKEN_TEST_DATABASE_URL: postgresql://splitken:splitken-ci-only@localhost:5432/splitken_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v7.0.1
+      # Flutter's own Dart SDK, such that every job builds with the same Dart.
+      - name: Install Flutter ${{ env.FLUTTER_VERSION }}
+        run: |
+          git clone --depth 1 --branch "$FLUTTER_VERSION" https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+      - run: dart --version
+      - name: core
+        working-directory: core
+        run: |
+          dart pub get
+          dart format --output=none --set-exit-if-changed .
+          dart analyze --fatal-infos
+          dart test
+      - name: server
+        working-directory: server
+        run: |
+          dart pub get
+          dart format --output=none --set-exit-if-changed .
+          dart analyze --fatal-infos
+          dart test
+
+  flutter:
+    name: Flutter app
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app_flutter
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Install Flutter ${{ env.FLUTTER_VERSION }}
+        working-directory: .
+        run: |
+          git clone --depth 1 --branch "$FLUTTER_VERSION" https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+      - run: flutter --version
+      - run: flutter pub get
+      - run: dart format --output=none --set-exit-if-changed .
+      - run: flutter analyze --fatal-infos
+      - run: flutter test
+
+  react-native:
+    name: React Native app
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app_rn
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: app_rn/package-lock.json
+      - run: npm ci --ignore-scripts
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npm test -- --ci

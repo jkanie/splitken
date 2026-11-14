@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "splitken",
+    "slug": "splitken",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": { "bundleIdentifier": "io.github.jkanie.splitken" },
+    "android": { "package": "io.github.jkanie.splitken" },
+    "web": { "bundler": "metro" }
+  }
+}

@@ -1,0 +1,19 @@
+name: splitken_server
+description: The splitken sync server for groups, the operation log, balances, on PostgreSQL.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.9.0
+
+dependencies:
+  postgres: ^3.6.0
+  shelf: ^1.4.3
+  shelf_router: ^1.1.5
+  splitken_core:
+    path: ../core
+
+dev_dependencies:
+  http: ^1.6.0
+  lints: ^6.1.0
+  test: ^1.33.0
