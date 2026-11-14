@@ -39,6 +39,23 @@ void main() {
     expect(find.text('5.00 CAD'), findsOneWidget);
     expect(find.text('2.50 CAD'), findsNWidgets(2));
 
+    // The same weights read as exact amounts, then as percentages, say what is left to assign.
+    await tester.tap(find.text('Exact'));
+    await tester.pump();
+    expect(
+      find.text('The exact parts add up to 4.00, not 10.00: 6.00 is left to assign.'),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('%'));
+    await tester.pump();
+    expect(
+      find.text('The percentages add up to 4%, not 100%: 96% is left to assign.'),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('Shares'));
+    await tester.pump();
+    expect(find.byKey(const Key('problem')), findsNothing);
+
     await tester.runAsync(() async {
       await tester.tap(find.byKey(const Key('save')));
       await Future<void>.delayed(const Duration(milliseconds: 50));

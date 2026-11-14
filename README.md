@@ -8,6 +8,8 @@ compared on equal terms.
 - Split an expense 4 ways: equally, by exact amounts, by shares, by percent.
   Cents are whole numbers and left-over cents go out by the largest
   remainder method, so the parts always add up to the amount.
+- While you type exact amounts or percentages, the form says how far they
+  are from the total: "6.00 is left to assign." or "10% over.".
 - See each member's net balance and a short list of payments that settle
   the group. Mark a payment as paid to record it.
 - Add, change, delete expenses offline. Changes wait on the device and go

@@ -30,6 +30,18 @@ test('add an expense, see the split, then the settle-up', async () => {
   expect(screen.getByTestId('part-m1')).toHaveTextContent('5.00 CAD');
   expect(screen.getByTestId('part-m2')).toHaveTextContent('2.50 CAD');
 
+  // The same weights read as exact amounts, then as percentages, say what is left to assign.
+  await fireEvent.press(screen.getByText('Exact'));
+  expect(screen.getByTestId('problem')).toHaveTextContent(
+    'The exact parts add up to 4.00, not 10.00: 6.00 is left to assign.',
+  );
+  await fireEvent.press(screen.getByText('%'));
+  expect(screen.getByTestId('problem')).toHaveTextContent(
+    'The percentages add up to 4%, not 100%: 96% is left to assign.',
+  );
+  await fireEvent.press(screen.getByText('Shares'));
+  expect(screen.queryByTestId('problem')).toBeNull();
+
   await fireEvent.press(screen.getByTestId('save'));
   expect(await screen.findByText('Pizza')).toBeOnTheScreen();
   expect(screen.getByText('10.00 CAD')).toBeOnTheScreen();

@@ -344,7 +344,29 @@
         ],
         "isTransfer": false
       },
-      "error": "bad_split"
+      "error": "bad_split",
+      "message": "The exact parts add up to 14.99, not 15.00: 0.01 is left to assign."
+    },
+    {
+      "name": "exact parts above the total",
+      "expense": {
+        "id": "e1",
+        "description": "Tickets",
+        "amountCents": 1500,
+        "paidBy": "a",
+        "participants": [
+          "a",
+          "b"
+        ],
+        "method": "exact",
+        "weights": [
+          1000,
+          600
+        ],
+        "isTransfer": false
+      },
+      "error": "bad_split",
+      "message": "The exact parts add up to 16.00, not 15.00: 1.00 over."
     },
     {
       "name": "exact part below 0",
@@ -386,7 +408,50 @@
         ],
         "isTransfer": false
       },
-      "error": "bad_split"
+      "error": "bad_split",
+      "message": "The percentages add up to 99.99%, not 100%: 0.01% is left to assign."
+    },
+    {
+      "name": "percent that adds up to 110%",
+      "expense": {
+        "id": "e1",
+        "description": "Hotel",
+        "amountCents": 1000,
+        "paidBy": "a",
+        "participants": [
+          "a",
+          "b"
+        ],
+        "method": "percent",
+        "weights": [
+          6000,
+          5000
+        ],
+        "isTransfer": false
+      },
+      "error": "bad_split",
+      "message": "The percentages add up to 110%, not 100%: 10% over."
+    },
+    {
+      "name": "percent that adds up to 90.5%",
+      "expense": {
+        "id": "e1",
+        "description": "Hotel",
+        "amountCents": 1000,
+        "paidBy": "a",
+        "participants": [
+          "a",
+          "b"
+        ],
+        "method": "percent",
+        "weights": [
+          4000,
+          5050
+        ],
+        "isTransfer": false
+      },
+      "error": "bad_split",
+      "message": "The percentages add up to 90.5%, not 100%: 9.5% is left to assign."
     },
     {
       "name": "a share of 0",

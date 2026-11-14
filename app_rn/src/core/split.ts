@@ -1,5 +1,6 @@
 import { SplitError } from './errors';
 import type { Expense } from './model';
+import { formatCents } from './money';
 
 /** The most shares 1 expense may hand out in total. */
 export const maxTotalShares = 1_000_000;
@@ -31,7 +32,8 @@ export function splitExpense(expense: Expense): number[] {
       if (total !== amount) {
         throw new SplitError(
           'bad_split',
-          `The exact parts add up to ${total} cents, not ${amount}.`,
+          `The exact parts add up to ${formatCents(total)}, not ${formatCents(amount)}: ` +
+            miss(amount - total, formatCents),
         );
       }
       return [...w];
@@ -53,11 +55,26 @@ export function splitExpense(expense: Expense): number[] {
       }
       const total = sum(w);
       if (total !== 10000) {
-        throw new SplitError('bad_split', `The percentages add up to ${total / 100}%, not 100%.`);
+        throw new SplitError(
+          'bad_split',
+          `The percentages add up to ${formatPercent(total)}, not 100%: ` +
+            miss(10000 - total, formatPercent),
+        );
       }
       return largestRemainder(amount, w);
     }
   }
+}
+
+/** Writes basis points as a percent with no trailing 0s: 9050 -> `90.5%`, 10000 -> `100%`, 1 -> `0.01%`. */
+export function formatPercent(basisPoints: number): string {
+  const text = formatCents(basisPoints).replace(/0+$/, '');
+  return `${text.endsWith('.') ? text.slice(0, -1) : text}%`;
+}
+
+/** How far a sum is from its target, for a form that shows what to change. */
+function miss(left: number, show: (n: number) => string): string {
+  return left > 0 ? `${show(left)} is left to assign.` : `${show(-left)} over.`;
 }
 
 function checkCount(expense: Expense): void {

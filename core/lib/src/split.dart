@@ -1,5 +1,6 @@
 import 'errors.dart';
 import 'model.dart';
+import 'money.dart';
 
 /// The most shares 1 expense may hand out in total. With [maxAmountCents] it
 /// keeps `amount * share` below 2^53, such that the TypeScript copy computes
@@ -33,7 +34,8 @@ List<int> splitExpense(Expense expense) {
       if (sum != amount) {
         throw SplitError(
           'bad_split',
-          'The exact parts add up to $sum cents, not $amount.',
+          'The exact parts add up to ${formatCents(sum)}, '
+              'not ${formatCents(amount)}: ${_miss(amount - sum, formatCents)}',
         );
       }
       return List.of(expense.weights);
@@ -62,12 +64,24 @@ List<int> splitExpense(Expense expense) {
       if (total != 10000) {
         throw SplitError(
           'bad_split',
-          'The percentages add up to ${total / 100}%, not 100%.',
+          'The percentages add up to ${formatPercent(total)}, not 100%: '
+              '${_miss(10000 - total, formatPercent)}',
         );
       }
       return _largestRemainder(amount, expense.weights);
   }
 }
+
+/// Writes basis points as a percent with no trailing 0s: 9050 -> `90.5%`,
+/// 10000 -> `100%`, 1 -> `0.01%`.
+String formatPercent(int basisPoints) {
+  final text = formatCents(basisPoints).replaceFirst(RegExp(r'0+$'), '');
+  return '${text.endsWith('.') ? text.substring(0, text.length - 1) : text}%';
+}
+
+/// How far a sum is from its target, for a form that shows what to change.
+String _miss(int left, String Function(int) show) =>
+    left > 0 ? '${show(left)} is left to assign.' : '${show(-left)} over.';
 
 void _checkCount(Expense expense) {
   if (expense.weights.length != expense.participants.length) {

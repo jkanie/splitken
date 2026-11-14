@@ -17,15 +17,17 @@ import {
 
 type Case = Record<string, any>;
 
-function code(action: () => unknown): string {
+function caught(action: () => unknown): SplitError {
   try {
     action();
   } catch (e) {
-    if (e instanceof SplitError) return e.code;
+    if (e instanceof SplitError) return e;
     throw e;
   }
   throw new Error('expected a SplitError');
 }
+
+const code = (action: () => unknown) => caught(action).code;
 
 const asObject = (net: Map<string, number>) => Object.fromEntries(net);
 
@@ -33,7 +35,10 @@ describe('split', () => {
   test.each((cases.split as Case[]).map((c) => [c.name, c]))('%s', (_, c) => {
     const expense = expenseFromJson(c.expense);
     if ('error' in c) {
-      expect(code(() => splitExpense(expense))).toBe(c.error);
+      const error = caught(() => splitExpense(expense));
+      expect(error.code).toBe(c.error);
+      // Where the case names the message, both cores must word it the same way.
+      if ('message' in c) expect(error.message).toBe(c.message);
     } else {
       const owed = splitExpense(expense);
       expect(owed).toEqual(c.owed);

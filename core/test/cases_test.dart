@@ -18,8 +18,11 @@ List<Member> _members(Object? json) => (json! as List<Object?>)
     .map((m) => Member.fromJson(m! as Map<String, Object?>))
     .toList();
 
-Matcher _splitError(String code) =>
-    throwsA(isA<SplitError>().having((e) => e.code, 'code', code));
+Matcher _splitError(String code, [String? message]) => throwsA(
+  isA<SplitError>()
+      .having((e) => e.code, 'code', code)
+      .having((e) => e.message, 'message', message ?? anything),
+);
 
 void main() {
   final all = _cases();
@@ -31,7 +34,7 @@ void main() {
         if (c.containsKey('error')) {
           expect(
             () => splitExpense(expense),
-            _splitError(c['error']! as String),
+            _splitError(c['error']! as String, c['message'] as String?),
           );
         } else {
           final owed = splitExpense(expense);
