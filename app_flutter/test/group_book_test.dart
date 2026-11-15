@@ -4,6 +4,7 @@ import 'package:splitken/src/group_book.dart';
 import 'package:splitken/src/key_value_store.dart';
 import 'package:splitken/src/library.dart';
 import 'package:splitken_core/splitken_core.dart';
+import 'package:splitken_server/splitken_server.dart' show Group;
 
 import 'support.dart';
 
@@ -175,6 +176,34 @@ void main() {
             ),
       ),
     );
+  });
+
+  test('a server restored from an older back-up gets the device\'s copy again', () async {
+    final storage = MemoryKeyValueStore();
+    final book = await (await device(storage)).create('Trip', 'CAD', ['Ana', 'Ben', 'Cy']);
+    await book.saveExpense(dinner('e1', 900));
+    await book.saveExpense(dinner('e2', 300, paidBy: 'm2'));
+    expect(await book.sync(), isTrue);
+    final net = book.net;
+
+    // The same group on a server that lost its operations, then the device again from its storage.
+    final restored = TestServer();
+    await restored.store.createGroup(
+      Group(
+        id: book.meta.id,
+        name: book.meta.name,
+        currency: book.meta.currency,
+        founders: book.meta.founders,
+      ),
+    );
+    final again = (await Library.load(restored.client(), storage)).books.single;
+    expect(again.seq, greaterThan(0));
+    expect(await again.sync(), isTrue);
+    expect(again.pending, isEmpty);
+    expect(again.confirmed.map((op) => op.expense!.id), ['e1', 'e2']);
+    expect(again.net, net);
+    expect(again.lastProblem, isNull);
+    expect((await restored.store.opsSince(book.meta.id, 0)).length, 2);
   });
 
   test('making a group with no network says so', () async {

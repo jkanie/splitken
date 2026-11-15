@@ -174,6 +174,42 @@ void main() {
     expect((status, json['stored'], json['seq']), (200, 0, 1));
   });
 
+  test('a since past the newest seq is refused and stores nothing', () async {
+    final id = await trip();
+    final first = {
+      'since': 0,
+      'ops': [
+        expenseOp('o1', 'phone', 1, 'x1', 900, 'm1', ['m1', 'm2', 'm3']),
+      ],
+    };
+    final seq =
+        (await api('POST', '/v1/groups/$id/sync', first)).$2['seq'] as int;
+    final (status, json) = await api('POST', '/v1/groups/$id/sync', {
+      'since': seq + 5,
+      'ops': [
+        expenseOp('o2', 'phone', 2, 'x2', 300, 'm2', ['m1', 'm2']),
+      ],
+    });
+    expect(
+      (status, json['error'], json['message']),
+      (
+        409,
+        'seq_ahead',
+        'since is ${seq + 5}, past this group\'s newest seq $seq. Fetch the group again from 0.',
+      ),
+    );
+    // o2 was not stored, and a sync from the newest seq itself is fine.
+    final (okStatus, okJson) = await api('POST', '/v1/groups/$id/sync', {
+      'since': seq,
+    });
+    expect((okStatus, okJson['seq']), (200, seq));
+    expect(okJson['ops'], isEmpty);
+    final all =
+        (await api('POST', '/v1/groups/$id/sync', {'since': 0})).$2['ops']
+            as List;
+    expect(all.map((o) => (o as Map)['opId']), ['o1']);
+  });
+
   test('a member added offline may pay in the same batch', () async {
     final id = await trip();
     final (status, json) = await api('POST', '/v1/groups/$id/sync', {

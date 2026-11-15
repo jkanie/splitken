@@ -118,6 +118,14 @@ paths:
                     items: { $ref: '#/components/schemas/Op' }
         '400': { $ref: '#/components/responses/Error' }
         '404': { $ref: '#/components/responses/Error' }
+        '409':
+          description: >
+            seq_ahead: since is past the group's newest seq, as after the
+            server is restored from an older back-up. Nothing is stored. The
+            device should send its operations again from since 0.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorBody' }
         '413': { $ref: '#/components/responses/Error' }
         '422': { $ref: '#/components/responses/Error' }
   /v1/groups/{id}/balances:
@@ -160,17 +168,19 @@ components:
       description: >
         A refused request. error is a stable code such as bad_json, not_found,
         too_large, bad_group, bad_member, bad_sync, bad_op, bad_expense,
-        bad_split, bad_amount, bad_transfer, unknown_member, too_many_members.
+        bad_split, bad_amount, bad_transfer, unknown_member, too_many_members,
+        seq_ahead.
       content:
         application/json:
-          schema:
-            type: object
-            required: [error, message]
-            properties:
-              error: { type: string }
-              message: { type: string }
-              opId: { type: string, description: The operation that broke a rule. }
+          schema: { $ref: '#/components/schemas/ErrorBody' }
   schemas:
+    ErrorBody:
+      type: object
+      required: [error, message]
+      properties:
+        error: { type: string }
+        message: { type: string }
+        opId: { type: string, description: The operation that broke a rule. }
     Member:
       type: object
       required: [id, name]

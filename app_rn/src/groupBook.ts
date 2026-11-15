@@ -155,6 +155,15 @@ export class GroupBook {
           return true;
         } catch (e) {
           if (!(e instanceof RefusedError)) throw e;
+          if (e.code === 'seq_ahead') {
+            // The server has less than this device saw, such as after a restore from an older back-up. Send
+            // everything again from 0: the server keeps what it has once and takes the rest.
+            const again = this.confirmed.map(({ seq: _seq, ...op }) => op);
+            this.pending.splice(0, 0, ...again);
+            this.confirmed.splice(0, this.confirmed.length);
+            this.seq = 0;
+            continue;
+          }
           const refused = this.pending.findIndex((op) => op.opId === e.opId);
           if (refused < 0) {
             this.lastProblem = e.message;

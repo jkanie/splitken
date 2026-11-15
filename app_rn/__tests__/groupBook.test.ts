@@ -149,6 +149,26 @@ test('a member name already in the group is refused, and nothing changes', async
   });
 });
 
+test("a server restored from an older back-up gets the device's copy again", async () => {
+  const storage = new MemoryStore();
+  const book = await (await device(storage)).create('Trip', 'CAD', ['Ana', 'Ben', 'Cy']);
+  await book.saveExpense(dinner('e1', 900));
+  await book.saveExpense(dinner('e2', 300, 'm2'));
+  expect(await book.sync()).toBe(true);
+  const before = net(book);
+
+  // The same group on a server that lost its operations, then the device again from its storage.
+  const restored = new FakeServer();
+  restored.restore(book.meta);
+  const again = (await Library.load(restored.client(), storage)).books[0];
+  expect(again.seq).toBeGreaterThan(0);
+  expect(await again.sync()).toBe(true);
+  expect(again.pending).toHaveLength(0);
+  expect(again.confirmed.map((op) => op.expense!.id)).toEqual(['e1', 'e2']);
+  expect(net(again)).toEqual(before);
+  expect(again.lastProblem).toBeNull();
+});
+
 test('making a group with no network says so', async () => {
   const a = await device();
   server.online = false;

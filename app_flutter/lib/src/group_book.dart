@@ -142,6 +142,15 @@ class GroupBook extends ChangeNotifier {
           _take(result, sending);
           return true;
         } on RefusedError catch (e) {
+          if (e.code == 'seq_ahead') {
+            // The server has less than this device saw, such as after a
+            // restore from an older back-up. Send everything again from 0:
+            // the server keeps what it has once and takes the rest.
+            pending.insertAll(0, [for (final op in confirmed) op.withoutSeq()]);
+            confirmed.clear();
+            seq = 0;
+            continue;
+          }
           final refused = pending.indexWhere((op) => op.opId == e.opId);
           if (refused < 0) {
             lastProblem = e.message;

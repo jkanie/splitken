@@ -40,6 +40,9 @@ abstract class Store {
   /// The group's operations with a seq above [since], in seq order.
   Future<List<Op>> opsSince(String groupId, int since);
 
+  /// The seq of the group's newest operation, or 0 when it has none.
+  Future<int> latestSeq(String groupId);
+
   /// Stores the operations of [ops] the group does not have yet, and returns
   /// how many it stored. An operation the group has (same clientId and opId)
   /// is skipped, such that a device may safely send a batch again.
@@ -74,6 +77,12 @@ class MemoryStore implements Store {
 
   @override
   Future<Group?> group(String id) async => _groups[id];
+
+  @override
+  Future<int> latestSeq(String groupId) async {
+    final ops = _ops[groupId] ?? const <Op>[];
+    return ops.isEmpty ? 0 : ops.last.seq!;
+  }
 
   @override
   Future<List<Op>> opsSince(String groupId, int since) async => [
@@ -177,6 +186,15 @@ class PostgresStore implements Store {
   @override
   Future<List<Op>> opsSince(String groupId, int since) =>
       _opsSince(_pool, groupId, since);
+
+  @override
+  Future<int> latestSeq(String groupId) async {
+    final rows = await _pool.execute(
+      Sql.named('SELECT coalesce(max(seq), 0) FROM ops WHERE group_id = @g'),
+      parameters: {'g': groupId},
+    );
+    return rows.single[0]! as int;
+  }
 
   Future<List<Op>> _opsSince(Session s, String groupId, int since) async {
     final rows = await s.execute(

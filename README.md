@@ -87,6 +87,11 @@ order of the same operations, and an operation sent twice counts once, so a
 device may re-try a sync freely. The `fold` cases in `spec/cases.json` check
 this in every rotation of each list, forwards and backwards.
 
+A device that asks for operations past the group's newest seq, as after the
+server is restored from an older back-up, gets a `seq_ahead` refusal (409).
+Both apps then send everything they hold again from seq 0, and the server
+keeps each operation once, so the group comes back whole.
+
 Members that devices add get ids that start with the device's client id,
 so 2 devices adding members offline never pick the same id.
 

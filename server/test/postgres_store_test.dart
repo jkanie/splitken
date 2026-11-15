@@ -61,6 +61,16 @@ void main() {
       'phone-1': -300,
     });
     expect(await store.opsSince('g1', stored.first.seq!), hasLength(1));
+    expect(await store.latestSeq('g1'), stored.last.seq);
+    await store.createGroup(
+      Group(
+        id: 'g2',
+        name: 'Empty',
+        currency: 'CAD',
+        founders: trip().founders,
+      ),
+    );
+    expect(await store.latestSeq('g2'), 0);
   }, skip: skip);
 
   test('a refused check stores nothing', () async {

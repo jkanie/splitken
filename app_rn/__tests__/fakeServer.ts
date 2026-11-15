@@ -27,6 +27,12 @@ export class FakeServer {
   private seq = 0;
   private nextId = 1;
 
+  /** Makes a group with no operations, as a server restored from a back-up older than its operations has it. */
+  restore(group: { id: string; name: string; currency: string; founders: Member[] }) {
+    this.groups.set(group.id, group);
+    this.ops.set(group.id, []);
+  }
+
   client(): ApiClient {
     return new ApiClient('http://splitken.test', async (input, init) => {
       this.requests++;
@@ -70,6 +76,16 @@ export class FakeServer {
       return { status: 404, body: { error: 'not_found', message: 'No group with that id.' } };
     const stored = this.ops.get(group.id)!;
     if (!match[2]) return { status: 200, body: { ...group, seq: stored.at(-1)?.seq ?? 0 } };
+    const newest = stored.at(-1)?.seq ?? 0;
+    if (body.since > newest) {
+      return {
+        status: 409,
+        body: {
+          error: 'seq_ahead',
+          message: `since is ${body.since}, past this group's newest seq ${newest}. Fetch the group again from 0.`,
+        },
+      };
+    }
 
     const fresh: Op[] = (body.ops as unknown[]).map(
       (o) => opToJson(opFromJson(o)) as unknown as Op,

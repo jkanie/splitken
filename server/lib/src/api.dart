@@ -110,14 +110,26 @@ Handler buildApi(Store store, {String Function()? newId}) {
         }
         ops.add(Op.fromJson(o).withoutSeq());
       }
+      // A device can only have seen seqs the server gave out. A since past
+      // the newest means its copy came from somewhere else, such as a server
+      // whose data was restored from an older back-up. Nothing is stored,
+      // such that the device can fetch the group again from 0, then re-send.
+      final newest = await store.latestSeq(id);
+      if (since > newest) {
+        throw _ApiError(
+          409,
+          'seq_ahead',
+          'since is $since, past this group\'s newest seq $newest. '
+              'Fetch the group again from 0.',
+        );
+      }
       final stored = await store.append(id, ops, (existing, fresh) {
         _check(group, existing, fresh);
       });
       final out = await store.opsSince(id, since);
-      final all = since == 0 ? out : await store.opsSince(id, 0);
       return _json(200, {
         'stored': stored,
-        'seq': all.isEmpty ? 0 : all.last.seq,
+        'seq': await store.latestSeq(id),
         'ops': [for (final op in out) op.toJson()],
       });
     })
