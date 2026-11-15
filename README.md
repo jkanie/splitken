@@ -114,6 +114,11 @@ DATABASE_URL='postgresql://user:pass@localhost:5432/splitken?sslmode=disable' \
 `PORT` sets the port (8080 by default). The server makes its tables on
 start.
 
+`GET /v1/groups/{id}/totals` gives what the group spent and each member's
+part of it, in cents: `paid` (the expenses they paid) and `share` (their
+split shares). A transfer is not spending, so it is left out, and the `paid`
+values and the `share` values each add up to `spent`.
+
 `GET /v1/groups/{id}/expenses.csv` gives the group's expenses as a CSV file
 for a spreadsheet: 1 row per expense that is not deleted, members by name,
 each participant's share as the split gives it. A description or name that

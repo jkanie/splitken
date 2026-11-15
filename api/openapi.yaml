@@ -156,6 +156,39 @@ paths:
                         to: { type: string }
                         amountCents: { type: integer, minimum: 1 }
         '404': { $ref: '#/components/responses/Error' }
+  /v1/groups/{id}/totals:
+    parameters:
+      - $ref: '#/components/parameters/GroupId'
+    get:
+      summary: What the group spent, and each member's part of it
+      description: >-
+        All amounts are in cents. paid is the sum of the expenses a member
+        paid, share the sum of their split shares. A transfer moves money
+        between members and is not spending, so it is left out. The paid
+        values and the share values each add up to spent. members is in
+        member order.
+      responses:
+        '200':
+          description: The totals.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [currency, spent, members]
+                properties:
+                  currency: { type: string, example: CAD }
+                  spent: { type: integer }
+                  members:
+                    type: array
+                    items:
+                      type: object
+                      required: [id, name, paid, share]
+                      properties:
+                        id: { type: string }
+                        name: { type: string }
+                        paid: { type: integer }
+                        share: { type: integer }
+        '404': { $ref: '#/components/responses/Error' }
   /v1/groups/{id}/expenses.csv:
     parameters:
       - $ref: '#/components/parameters/GroupId'

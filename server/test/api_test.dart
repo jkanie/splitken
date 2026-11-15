@@ -161,6 +161,61 @@ void main() {
     });
   });
 
+  test('totals give what each member paid and owes, without transfers', () async {
+    final id = await trip();
+    final (empty, json0) = await api('GET', '/v1/groups/$id/totals');
+    expect(empty, 200);
+    expect(json0['spent'], 0);
+    Map<String, Object?> op(String opId, int lamport, Map<String, Object?> e) =>
+        {
+          'opId': opId,
+          'clientId': 'phone',
+          'lamport': lamport,
+          'kind': 'expense',
+          'expense': {'isTransfer': false, ...e},
+        };
+    final (status, _) = await api('POST', '/v1/groups/$id/sync', {
+      'since': 0,
+      'ops': [
+        expenseOp('o1', 'phone', 1, 'x1', 1000, 'm1', ['m1', 'm2', 'm3']),
+        op('o2', 2, {
+          'id': 'x2',
+          'description': 'Kayaks',
+          'amountCents': 900,
+          'paidBy': 'm2',
+          'participants': ['m2', 'm3'],
+          'method': 'shares',
+          'weights': [2, 1],
+        }),
+        op('o3', 3, {
+          'id': 'x3',
+          'description': 'Ben pays Ana back',
+          'amountCents': 2500,
+          'paidBy': 'm2',
+          'participants': ['m1'],
+          'method': 'exact',
+          'weights': [2500],
+          'isTransfer': true,
+        }),
+      ],
+    });
+    expect(status, 200);
+    final (got, json) = await api('GET', '/v1/groups/$id/totals');
+    expect(got, 200);
+    // 10.00 / 3 gives Ana the 1 cent left over. The 25.00 transfer is not spending.
+    expect(json, {
+      'currency': 'CAD',
+      'spent': 1900,
+      'members': [
+        {'id': 'm1', 'name': 'Ana', 'paid': 1000, 'share': 334},
+        {'id': 'm2', 'name': 'Ben', 'paid': 900, 'share': 933},
+        {'id': 'm3', 'name': 'Cai', 'paid': 0, 'share': 633},
+      ],
+    });
+    final (missing, _) = await api('GET', '/v1/groups/nope/totals');
+    expect(missing, 404);
+  });
+
   test(
     'the expenses down-load as CSV, by name, without deleted ones',
     () async {

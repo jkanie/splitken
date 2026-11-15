@@ -143,6 +143,11 @@ Handler buildApi(Store store, {String Function()? newId}) {
         'settle': [for (final t in settleUp(state.members, net)) t.toJson()],
       });
     })
+    ..get('/v1/groups/<id>/totals', (Request request, String id) async {
+      final group = await _group(store, id);
+      final state = fold(group.founders, await store.opsSince(id, 0));
+      return _json(200, _totals(group, state));
+    })
     ..get('/v1/groups/<id>/expenses.csv', (Request request, String id) async {
       final group = await _group(store, id);
       final state = fold(group.founders, await store.opsSince(id, 0));
@@ -159,6 +164,31 @@ Handler buildApi(Store store, {String Function()? newId}) {
       .addMiddleware(_cors)
       .addMiddleware(_errors)
       .addHandler(router.call);
+}
+
+/// What the group spent, and each member's part of it, in cents: paid is the
+/// sum of the expenses a member paid, share the sum of their split shares.
+/// A transfer moves money between members and is not spending, so it is left
+/// out. The paid values and the share values each add up to spent.
+Map<String, Object?> _totals(Group group, GroupState state) {
+  final paid = {for (final m in state.members) m.id: 0};
+  final share = {for (final m in state.members) m.id: 0};
+  var spent = 0;
+  for (final e in state.expenses.where((e) => !e.isTransfer)) {
+    spent += e.amountCents;
+    paid[e.paidBy] = paid[e.paidBy]! + e.amountCents;
+    for (final (i, cents) in splitExpense(e).indexed) {
+      share[e.participants[i]] = share[e.participants[i]]! + cents;
+    }
+  }
+  return {
+    'currency': group.currency,
+    'spent': spent,
+    'members': [
+      for (final m in state.members)
+        {'id': m.id, 'name': m.name, 'paid': paid[m.id], 'share': share[m.id]},
+    ],
+  };
 }
 
 /// The expenses that are not deleted, as CSV (RFC 4180, CRLF line ends), in
