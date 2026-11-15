@@ -161,6 +161,101 @@ void main() {
     });
   });
 
+  test(
+    'the expenses down-load as CSV, by name, without deleted ones',
+    () async {
+      final id = await trip();
+      Map<String, Object?> op(
+        String opId,
+        int lamport,
+        Map<String, Object?> e,
+      ) => {
+        'opId': opId,
+        'clientId': 'phone',
+        'lamport': lamport,
+        'kind': 'expense',
+        'expense': {
+          'method': 'equal',
+          'weights': <int>[],
+          'isTransfer': false,
+          ...e,
+        },
+      };
+      final (status, _) = await api('POST', '/v1/groups/$id/sync', {
+        'since': 0,
+        'ops': [
+          memberOp('o0', 'phone', 1, 'p-dee', '\uFF20Dee'),
+          op('o1', 2, {
+            'id': 'x1',
+            'description': 'Fuel, ferry, "snacks"',
+            'amountCents': 1000,
+            'paidBy': 'm1',
+            'participants': ['m1', 'm2', 'm3'],
+          }),
+          op('o2', 3, {
+            'id': 'x2',
+            'description': '=1+1',
+            'amountCents': 900,
+            'paidBy': 'p-dee',
+            'participants': ['m2', 'p-dee'],
+            'method': 'shares',
+            'weights': [2, 1],
+          }),
+          op('o3', 4, {
+            'id': 'x3',
+            'description': 'Ben pays Ana back',
+            'amountCents': 2500,
+            'paidBy': 'm2',
+            'participants': ['m1'],
+            'method': 'exact',
+            'weights': [2500],
+            'isTransfer': true,
+          }),
+          op('o4', 5, {
+            'id': 'x4',
+            'description': 'Deleted',
+            'amountCents': 100,
+            'paidBy': 'm1',
+            'participants': ['m1'],
+          }),
+          {
+            'opId': 'o5',
+            'clientId': 'phone',
+            'lamport': 6,
+            'kind': 'delete',
+            'expenseId': 'x4',
+          },
+        ],
+      });
+      expect(status, 200);
+
+      final response = await buildApi(store)(
+        Request(
+          'GET',
+          Uri.parse('http://localhost/v1/groups/$id/expenses.csv'),
+        ),
+      );
+      expect(response.statusCode, 200);
+      expect(response.headers['content-type'], 'text/csv; charset=utf-8');
+      expect(
+        response.headers['content-disposition'],
+        'attachment; filename="expenses.csv"',
+      );
+      // The 10 cents left over from 10.00 / 3 go to the 1st participant.
+      expect(
+        await response.readAsString(),
+        'description,amount,currency,paid_by,split,shares,transfer\r\n'
+        '"Fuel, ferry, ""snacks""",10.00,CAD,Ana,equal,'
+        'Ana 3.34; Ben 3.33; Cai 3.33,no\r\n'
+        "'=1+1,9.00,CAD,'\uFF20Dee,shares,Ben 6.00; \uFF20Dee 3.00,no\r\n"
+        'Ben pays Ana back,25.00,CAD,Ben,exact,Ana 25.00,yes\r\n',
+      );
+
+      final (missing, _) = await api('GET', '/v1/groups/nope/expenses.csv');
+      expect(missing, 404);
+    },
+  );
+
   test('a batch sent twice is stored once', () async {
     final id = await trip();
     final batch = {

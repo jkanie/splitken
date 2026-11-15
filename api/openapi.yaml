@@ -156,6 +156,30 @@ paths:
                         to: { type: string }
                         amountCents: { type: integer, minimum: 1 }
         '404': { $ref: '#/components/responses/Error' }
+  /v1/groups/{id}/expenses.csv:
+    parameters:
+      - $ref: '#/components/parameters/GroupId'
+    get:
+      summary: The expenses as a CSV file
+      description: >-
+        1 row per expense that is not deleted, in the order the operations
+        1st added them, with the columns description, amount, currency,
+        paid_by, split, shares, transfer. Members appear by name. shares
+        lists each participant's part as the split gives it, such as
+        "Ana 3.34; Ben 3.33". The file follows RFC 4180, with CRLF line
+        ends. A description or name that starts with =, +, -, @, their
+        full-width forms, a tab, a carriage return, a line feed gets a ' in
+        front, such that a spreadsheet does not read it as a formula.
+      responses:
+        '200':
+          description: The CSV file.
+          headers:
+            Content-Disposition:
+              schema: { type: string, example: 'attachment; filename="expenses.csv"' }
+          content:
+            text/csv:
+              schema: { type: string }
+        '404': { $ref: '#/components/responses/Error' }
 components:
   parameters:
     GroupId:

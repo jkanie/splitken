@@ -142,6 +142,17 @@ Handler buildApi(Store store, {String Function()? newId}) {
         'net': net,
         'settle': [for (final t in settleUp(state.members, net)) t.toJson()],
       });
+    })
+    ..get('/v1/groups/<id>/expenses.csv', (Request request, String id) async {
+      final group = await _group(store, id);
+      final state = fold(group.founders, await store.opsSince(id, 0));
+      return Response.ok(
+        _expensesCsv(group, state),
+        headers: {
+          'content-type': 'text/csv; charset=utf-8',
+          'content-disposition': 'attachment; filename="expenses.csv"',
+        },
+      );
     });
 
   return const Pipeline()
@@ -149,6 +160,54 @@ Handler buildApi(Store store, {String Function()? newId}) {
       .addMiddleware(_errors)
       .addHandler(router.call);
 }
+
+/// The expenses that are not deleted, as CSV (RFC 4180, CRLF line ends), in
+/// the order of [GroupState.expenses]: 1 row each, with members by name and
+/// each participant's share as the split gives it.
+String _expensesCsv(Group group, GroupState state) {
+  final names = {for (final m in state.members) m.id: m.name};
+  final rows = [
+    [
+      'description',
+      'amount',
+      'currency',
+      'paid_by',
+      'split',
+      'shares',
+      'transfer',
+    ],
+    for (final e in state.expenses)
+      [
+        _text(e.description),
+        formatCents(e.amountCents),
+        group.currency,
+        _text(names[e.paidBy]!),
+        e.method.name,
+        _text(
+          [
+            for (final (i, cents) in splitExpense(e).indexed)
+              '${names[e.participants[i]]} ${formatCents(cents)}',
+          ].join('; '),
+        ),
+        e.isTransfer ? 'yes' : 'no',
+      ],
+  ];
+  return '${rows.map((r) => r.map(_csvField).join(',')).join('\r\n')}\r\n';
+}
+
+/// A field that a spreadsheet could read as a formula gets a ' in front, as
+/// OWASP's CSV injection page advises, since any member may write a
+/// description or a name: 1 that starts with =, +, -, @, their full-width
+/// forms, a tab, a carriage return, a line feed.
+String _text(String value) =>
+    RegExp('^[=+\\-@\t\r\n\uFF1D\uFF0B\uFF0D\uFF20]').hasMatch(value)
+    ? "'$value"
+    : value;
+
+/// Quotes a field that holds a comma, a quote, a line break, as RFC 4180 asks.
+String _csvField(String value) => RegExp(r'[",\r\n]').hasMatch(value)
+    ? '"${value.replaceAll('"', '""')}"'
+    : value;
 
 /// Checks new operations against the group as the stored ones leave it,
 /// 1 at a time, such that an expense may name a member added earlier in the

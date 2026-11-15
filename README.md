@@ -114,6 +114,13 @@ DATABASE_URL='postgresql://user:pass@localhost:5432/splitken?sslmode=disable' \
 `PORT` sets the port (8080 by default). The server makes its tables on
 start.
 
+`GET /v1/groups/{id}/expenses.csv` gives the group's expenses as a CSV file
+for a spreadsheet: 1 row per expense that is not deleted, members by name,
+each participant's share as the split gives it. A description or name that
+starts with `=`, `+`, `-`, `@`, their full-width forms, a tab, a carriage
+return, a line feed gets a `'` in front, as OWASP's CSV injection page
+advises, such that a spreadsheet does not read it as a formula.
+
 ### Flutter app
 
 ```sh
