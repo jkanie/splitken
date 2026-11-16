@@ -166,27 +166,23 @@ Handler buildApi(Store store, {String Function()? newId}) {
       .addHandler(router.call);
 }
 
-/// What the group spent, and each member's part of it, in cents: paid is the
-/// sum of the expenses a member paid, share the sum of their split shares.
-/// A transfer moves money between members and is not spending, so it is left
-/// out. The paid values and the share values each add up to spent.
+/// What the group spent, and each member's part of it, in cents, from the
+/// core's [spending]: paid is the sum of the expenses a member paid, share the
+/// sum of their split shares. Transfers are left out. The paid values and the
+/// share values each add up to spent.
 Map<String, Object?> _totals(Group group, GroupState state) {
-  final paid = {for (final m in state.members) m.id: 0};
-  final share = {for (final m in state.members) m.id: 0};
-  var spent = 0;
-  for (final e in state.expenses.where((e) => !e.isTransfer)) {
-    spent += e.amountCents;
-    paid[e.paidBy] = paid[e.paidBy]! + e.amountCents;
-    for (final (i, cents) in splitExpense(e).indexed) {
-      share[e.participants[i]] = share[e.participants[i]]! + cents;
-    }
-  }
+  final s = spending(state.members, state.expenses);
   return {
     'currency': group.currency,
-    'spent': spent,
+    'spent': s.spentCents,
     'members': [
       for (final m in state.members)
-        {'id': m.id, 'name': m.name, 'paid': paid[m.id], 'share': share[m.id]},
+        {
+          'id': m.id,
+          'name': m.name,
+          'paid': s.paid[m.id],
+          'share': s.share[m.id],
+        },
     ],
   };
 }

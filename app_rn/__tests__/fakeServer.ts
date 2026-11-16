@@ -10,6 +10,7 @@ import {
   fold,
   opFromJson,
   opToJson,
+  spending,
   splitExpense,
   validateExpense,
 } from '../src/core';
@@ -126,27 +127,18 @@ export class FakeServer {
     };
   }
 
-  /** As the server's _totals: transfers are left out, and each share is the split of the expense. */
+  /** As the server's _totals: both read the spending from their core. */
   private totals(group: { currency: string; founders: Member[] }, stored: Op[]) {
     const state = fold(group.founders, stored);
-    const paid = new Map(state.members.map((m) => [m.id, 0]));
-    const share = new Map(state.members.map((m) => [m.id, 0]));
-    let spent = 0;
-    for (const e of state.expenses.filter((e) => !e.isTransfer)) {
-      spent += e.amountCents;
-      paid.set(e.paidBy, paid.get(e.paidBy)! + e.amountCents);
-      splitExpense(e).forEach((cents, i) =>
-        share.set(e.participants[i], share.get(e.participants[i])! + cents),
-      );
-    }
+    const s = spending(state.members, state.expenses);
     return {
       currency: group.currency,
-      spent,
+      spent: s.spentCents,
       members: state.members.map((m) => ({
         id: m.id,
         name: m.name,
-        paid: paid.get(m.id),
-        share: share.get(m.id),
+        paid: s.paid.get(m.id),
+        share: s.share.get(m.id),
       })),
     };
   }

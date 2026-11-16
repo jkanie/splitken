@@ -12,4 +12,5 @@ export 'src/model.dart';
 export 'src/money.dart';
 export 'src/ops.dart';
 export 'src/settle.dart';
+export 'src/spending.dart';
 export 'src/split.dart';

@@ -40,7 +40,7 @@ caches. Line counts leave out blank lines.
 | App code, not counting the shared rules | 927 lines | 1046 lines |
 | of which screens | 509 lines | 565 lines, plus a small UI kit (Material ships with Flutter) |
 | The shared rules (split, balances, settle-up, merge) | 583 lines, used by the app and the server | 466 lines, a port checked by `spec/cases.json` |
-| Tests | 13 app tests, plus 62 core and 18 server tests | 73 tests, 58 of them from `spec/cases.json` |
+| Tests | 13 app tests, plus 65 core and 18 server tests | 76 tests, 58 of them from `spec/cases.json` |
 | What the app tests sync against | The real Dart server in-process | A TypeScript copy of the server's rules |
 | Test run | about 6.5 s (`flutter test`) | about 1.8 s (`jest`) |
 | Static check | about 9.4 s (`flutter analyze`) | about 1.9 s (`tsc --noEmit`) |
@@ -121,6 +121,10 @@ values and the `share` values each add up to `spent`. Both apps read it
 with `totals(groupId)` on their API client, which gives `currency` and
 `spentCents`, plus 1 entry per member with `paidCents` and `shareCents`.
 Changes still pending on a device are not in it until they are synced.
+The sums come from `spending(members, expenses)` in each core (Dart and
+TypeScript), the same function the server uses. An app can call it on its
+own copy of a group, pending changes included, with no network. Without
+transfers, a member's paid minus share is their balance.
 
 `GET /v1/groups/{id}/expenses.csv` gives the group's expenses as a CSV file
 for a spreadsheet: 1 row per expense that is not deleted, members by name,
