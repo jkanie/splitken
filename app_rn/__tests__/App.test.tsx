@@ -49,6 +49,10 @@ test('add an expense, see the split, then the settle-up', async () => {
   await fireEvent.press(screen.getByText('Balances'));
   expect(screen.getByText('+5.00')).toBeOnTheScreen();
   expect(screen.getAllByText('-2.50')).toHaveLength(2);
+  // What each member paid and owes, which the balance is the difference of.
+  expect(screen.getByText('Spent 10.00 CAD')).toBeOnTheScreen();
+  expect(screen.getByText('Paid 10.00, share 5.00')).toBeOnTheScreen();
+  expect(screen.getAllByText('Paid 0.00, share 2.50')).toHaveLength(2);
   expect(screen.getByText('Ben pays Ana')).toBeOnTheScreen();
   expect(screen.getByText('Cy pays Ana')).toBeOnTheScreen();
 });

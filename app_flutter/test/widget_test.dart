@@ -68,6 +68,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('+5.00'), findsOneWidget);
     expect(find.text('-2.50'), findsNWidgets(2));
+    // What each member paid and owes, which the balance is the difference of.
+    expect(find.text('Spent 10.00 CAD'), findsOneWidget);
+    expect(find.text('Paid 10.00, share 5.00'), findsOneWidget);
+    expect(find.text('Paid 0.00, share 2.50'), findsNWidgets(2));
     expect(find.text('Ben pays Ana'), findsOneWidget);
     expect(find.text('Cy pays Ana'), findsOneWidget);
   });

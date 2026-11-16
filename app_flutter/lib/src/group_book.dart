@@ -55,6 +55,10 @@ class GroupBook extends ChangeNotifier {
 
   List<Transfer> get settle => settleUp(_state.members, _net);
 
+  /// What the group spent and each member's part of it, pending changes
+  /// included, from the core's [spending].
+  Spending get spent => spending(_state.members, _state.expenses);
+
   String memberName(String id) =>
       _state.members.where((m) => m.id == id).map((m) => m.name).firstOrNull ?? id;
 

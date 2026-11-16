@@ -98,13 +98,20 @@ function Expenses({
 
 function Balances({ book, cur }: { book: GroupBook; cur: string }) {
   const settle = book.settle;
+  const spent = book.spent;
   return (
     <View>
+      <Text style={{ padding: 16 }}>{`Spent ${formatCents(spent.spentCents)} ${cur}`}</Text>
       {book.state.members.map((m) => {
         const cents = book.net.get(m.id)!;
         return (
           <Row key={m.id}>
-            <Text style={styles.grow}>{m.name}</Text>
+            <View style={styles.grow}>
+              <Text>{m.name}</Text>
+              <Text style={styles.muted}>
+                {`Paid ${formatCents(spent.paid.get(m.id)!)}, share ${formatCents(spent.share.get(m.id)!)}`}
+              </Text>
+            </View>
             <Text style={{ color: cents < 0 ? colors.owes : colors.owed }}>
               {`${cents > 0 ? '+' : ''}${formatCents(cents)}`}
             </Text>

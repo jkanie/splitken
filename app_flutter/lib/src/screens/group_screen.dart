@@ -116,11 +116,16 @@ class _Balances extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settle = book.settle;
+    final spent = book.spent;
     return ListView(
       children: [
+        ListTile(title: Text('Spent ${formatCents(spent.spentCents)} ${book.meta.currency}')),
         for (final m in book.state.members)
           ListTile(
             title: Text(m.name),
+            subtitle: Text(
+              'Paid ${formatCents(spent.paid[m.id]!)}, share ${formatCents(spent.share[m.id]!)}',
+            ),
             trailing: Text(
               '${book.net[m.id]! > 0 ? '+' : ''}${formatCents(book.net[m.id]!)}',
               style: TextStyle(

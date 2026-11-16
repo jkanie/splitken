@@ -4,6 +4,7 @@ import {
   type Member,
   type Op,
   type OpKind,
+  type Spending,
   SplitError,
   type Transfer,
   balances,
@@ -12,6 +13,7 @@ import {
   opFromJson,
   opToJson,
   settleUp,
+  spending,
   splitExpense,
   validateExpense,
 } from './core';
@@ -65,6 +67,11 @@ export class GroupBook {
 
   get settle(): Transfer[] {
     return settleUp(this.state.members, this.net);
+  }
+
+  /** What the group spent and each member's part of it, pending changes included, from the core's spending. */
+  get spent(): Spending {
+    return spending(this.state.members, this.state.expenses);
   }
 
   memberName(id: string): string {

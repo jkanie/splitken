@@ -12,6 +12,9 @@ compared on equal terms.
   are from the total: "6.00 is left to assign." or "10% over.".
 - See each member's net balance and a short list of payments that settle
   the group. Mark a payment as paid to record it.
+- The Balances tab also shows what the group spent, and under each member
+  what they paid and their share, from `spending()` in the core. It counts
+  changes still waiting on the device, and leaves out settle-up payments.
 - Add, change, delete expenses offline. Changes wait on the device and go
   out on the next sync. 2 devices that edit offline end up with the same
   group, whatever order their changes reach the server in.
