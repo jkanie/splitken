@@ -84,6 +84,40 @@ void main() {
     expect(await book.sync(), isTrue);
   });
 
+  test('paidLine says who paid and how the expense is split', () async {
+    final a = await device();
+    final book = await a.create('Lunch', 'CAD', ['Ana', 'Ben', 'Cy']);
+    expect(book.paidLine(dinner('e1', 1000)), 'Ana paid, split 3 ways');
+    Expense taxi(SplitMethod method, List<String> participants) => Expense(
+      id: 'e2',
+      description: 'Taxi',
+      amountCents: 900,
+      paidBy: 'm2',
+      participants: participants,
+      method: method,
+      weights: [for (final _ in participants) 1],
+    );
+    expect(
+      book.paidLine(taxi(SplitMethod.exact, ['m1', 'm2'])),
+      'Ben paid, split 2 ways by exact amounts',
+    );
+    expect(
+      book.paidLine(taxi(SplitMethod.shares, ['m1', 'm2'])),
+      'Ben paid, split 2 ways by shares',
+    );
+    expect(
+      book.paidLine(taxi(SplitMethod.percent, ['m1', 'm2'])),
+      'Ben paid, split 2 ways by percent',
+    );
+    expect(book.paidLine(taxi(SplitMethod.equal, ['m3'])), 'Ben paid, for Cy only');
+    // A settle-up payment's description already says who paid whom.
+    await book.saveExpense(dinner('e1', 1000));
+    await book.recordTransfer(book.settle.first);
+    final transfer = book.state.expenses.last;
+    expect(transfer.isTransfer, isTrue);
+    expect(book.paidLine(transfer), 'Settle-up payment');
+  });
+
   test('an operation the server refuses is dropped and the rest are sent', () async {
     final a = await device();
     final book = await a.create('Club', 'CAD', ['Ana', 'Ben', 'Cy']);

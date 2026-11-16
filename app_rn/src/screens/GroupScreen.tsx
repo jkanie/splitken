@@ -89,7 +89,7 @@ function Expenses({
     >
       <View style={styles.grow}>
         <Text>{e.description}</Text>
-        <Text style={styles.muted}>{`${book.memberName(e.paidBy)} paid`}</Text>
+        <Text style={styles.muted}>{book.paidLine(e)}</Text>
       </View>
       <Text>{`${formatCents(e.amountCents)} ${cur}`}</Text>
     </Row>

@@ -63,6 +63,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Pizza'), findsOneWidget);
     expect(find.text('10.00 CAD'), findsOneWidget);
+    expect(find.text('Ana paid, split 3 ways by shares'), findsOneWidget);
 
     await tester.tap(find.text('Balances'));
     await tester.pumpAndSettle();

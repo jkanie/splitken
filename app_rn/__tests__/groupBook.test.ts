@@ -78,6 +78,30 @@ test('settling up records a transfer that clears the balances', async () => {
   expect(await book.sync()).toBe(true);
 });
 
+test('paidLine says who paid and how the expense is split', async () => {
+  const book = await (await device()).create('Lunch', 'CAD', ['Ana', 'Ben', 'Cy']);
+  expect(book.paidLine(dinner('e1', 1000))).toBe('Ana paid, split 3 ways');
+  const taxi = (method: Expense['method'], participants: string[]): Expense => ({
+    ...dinner('e2', 900, 'm2'),
+    description: 'Taxi',
+    participants,
+    method,
+    weights: participants.map(() => 1),
+  });
+  expect(book.paidLine(taxi('exact', ['m1', 'm2']))).toBe(
+    'Ben paid, split 2 ways by exact amounts',
+  );
+  expect(book.paidLine(taxi('shares', ['m1', 'm2']))).toBe('Ben paid, split 2 ways by shares');
+  expect(book.paidLine(taxi('percent', ['m1', 'm2']))).toBe('Ben paid, split 2 ways by percent');
+  expect(book.paidLine(taxi('equal', ['m3']))).toBe('Ben paid, for Cy only');
+  // A settle-up payment's description already says who paid whom.
+  await book.saveExpense(dinner('e1', 1000));
+  await book.recordTransfer(book.settle[0]);
+  const transfer = book.state.expenses.at(-1)!;
+  expect(transfer.isTransfer).toBe(true);
+  expect(book.paidLine(transfer)).toBe('Settle-up payment');
+});
+
 test('an operation the server refuses is dropped and the rest are sent', async () => {
   const book = await (await device()).create('Club', 'CAD', ['Ana', 'Ben', 'Cy']);
   await book.saveExpense(dinner('e1', 300));

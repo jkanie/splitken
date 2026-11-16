@@ -45,6 +45,7 @@ test('add an expense, see the split, then the settle-up', async () => {
   await fireEvent.press(screen.getByTestId('save'));
   expect(await screen.findByText('Pizza')).toBeOnTheScreen();
   expect(screen.getByText('10.00 CAD')).toBeOnTheScreen();
+  expect(screen.getByText('Ana paid, split 3 ways by shares')).toBeOnTheScreen();
 
   await fireEvent.press(screen.getByText('Balances'));
   expect(screen.getByText('+5.00')).toBeOnTheScreen();

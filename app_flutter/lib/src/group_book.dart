@@ -62,6 +62,24 @@ class GroupBook extends ChangeNotifier {
   String memberName(String id) =>
       _state.members.where((m) => m.id == id).map((m) => m.name).firstOrNull ?? id;
 
+  /// The line under an expense in the list: who paid and how it is split,
+  /// such as "Ana paid, split 3 ways by shares". A settle-up payment names
+  /// itself, since its description already says who paid whom.
+  String paidLine(Expense e) {
+    if (e.isTransfer) return 'Settle-up payment';
+    final payer = '${memberName(e.paidBy)} paid';
+    if (e.participants.length == 1) {
+      return '$payer, for ${memberName(e.participants.single)} only';
+    }
+    final by = switch (e.method) {
+      SplitMethod.equal => '',
+      SplitMethod.exact => ' by exact amounts',
+      SplitMethod.shares => ' by shares',
+      SplitMethod.percent => ' by percent',
+    };
+    return '$payer, split ${e.participants.length} ways$by';
+  }
+
   static String storageKey(String groupId) => 'group:$groupId';
 
   void _refold() {

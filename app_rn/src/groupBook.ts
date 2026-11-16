@@ -78,6 +78,24 @@ export class GroupBook {
     return this.state.members.find((m) => m.id === id)?.name ?? id;
   }
 
+  /**
+   * The line under an expense in the list: who paid and how it is split, such as "Ana paid, split 3 ways by shares".
+   * A settle-up payment names itself, since its description already says who paid whom.
+   */
+  paidLine(e: Expense): string {
+    if (e.isTransfer) return 'Settle-up payment';
+    const payer = `${this.memberName(e.paidBy)} paid`;
+    if (e.participants.length === 1)
+      return `${payer}, for ${this.memberName(e.participants[0])} only`;
+    const by = {
+      equal: '',
+      exact: ' by exact amounts',
+      shares: ' by shares',
+      percent: ' by percent',
+    }[e.method];
+    return `${payer}, split ${e.participants.length} ways${by}`;
+  }
+
   private notify() {
     this.version++;
     for (const l of this.listeners) l();

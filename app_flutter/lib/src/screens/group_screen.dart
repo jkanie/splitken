@@ -92,7 +92,7 @@ class _Expenses extends StatelessWidget {
           ListTile(
             leading: Icon(e.isTransfer ? Icons.swap_horiz : Icons.receipt_long),
             title: Text(e.description),
-            subtitle: Text('${book.memberName(e.paidBy)} paid'),
+            subtitle: Text(book.paidLine(e)),
             trailing: Text('${formatCents(e.amountCents)} ${book.meta.currency}'),
             onTap: e.isTransfer
                 ? null
