@@ -26,6 +26,52 @@ export function groupMetaFromJson(json: unknown): GroupMeta {
   };
 }
 
+/** What 1 member paid and what their share came to, in cents. */
+export interface MemberTotal {
+  id: string;
+  name: string;
+  paidCents: number;
+  shareCents: number;
+}
+
+/**
+ * What a group spent, from `GET /v1/groups/{id}/totals`. Transfers that
+ * settle up are not spending, so they are left out.
+ */
+export interface GroupTotals {
+  currency: string;
+  spentCents: number;
+  members: MemberTotal[];
+}
+
+export function groupTotalsFromJson(json: unknown): GroupTotals {
+  const bad = () => new OfflineError('The server sent totals in a form this app does not know.');
+  if (
+    !isJsonObject(json) ||
+    typeof json.currency !== 'string' ||
+    !Number.isSafeInteger(json.spent) ||
+    !Array.isArray(json.members)
+  ) {
+    throw bad();
+  }
+  return {
+    currency: json.currency,
+    spentCents: json.spent as number,
+    members: json.members.map((m) => {
+      if (
+        !isJsonObject(m) ||
+        typeof m.id !== 'string' ||
+        typeof m.name !== 'string' ||
+        !Number.isSafeInteger(m.paid) ||
+        !Number.isSafeInteger(m.share)
+      ) {
+        throw bad();
+      }
+      return { id: m.id, name: m.name, paidCents: m.paid as number, shareCents: m.share as number };
+    }),
+  };
+}
+
 /** What a sync returns: the operations after `since`, and the newest seq. */
 export interface SyncResult {
   seq: number;
@@ -78,6 +124,16 @@ export class ApiClient {
       throw new OfflineError('The server sent a sync answer in a form this app does not know.');
     }
     return { seq: json.seq as number, ops: json.ops.map(opFromJson) };
+  }
+
+  /**
+   * What the group spent, from the operations the server holds. Changes
+   * still pending on a device are not in it until they are synced.
+   */
+  async totals(groupId: string): Promise<GroupTotals> {
+    return groupTotalsFromJson(
+      await this.send('GET', `/v1/groups/${encodeURIComponent(groupId)}/totals`),
+    );
   }
 
   private async send(

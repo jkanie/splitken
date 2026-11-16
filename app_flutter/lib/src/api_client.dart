@@ -30,6 +30,47 @@ class GroupMeta {
   );
 }
 
+/// What 1 member paid and what their share came to, in cents.
+class MemberTotal {
+  MemberTotal({
+    required this.id,
+    required this.name,
+    required this.paidCents,
+    required this.shareCents,
+  });
+
+  final String id;
+  final String name;
+  final int paidCents;
+  final int shareCents;
+
+  factory MemberTotal.fromJson(Map<String, Object?> json) => MemberTotal(
+    id: json['id']! as String,
+    name: json['name']! as String,
+    paidCents: json['paid']! as int,
+    shareCents: json['share']! as int,
+  );
+}
+
+/// What a group spent, from `GET /v1/groups/{id}/totals`. Transfers that settle
+/// up are not spending, so they are left out.
+class GroupTotals {
+  GroupTotals({required this.currency, required this.spentCents, required this.members});
+
+  final String currency;
+  final int spentCents;
+  final List<MemberTotal> members;
+
+  factory GroupTotals.fromJson(Map<String, Object?> json) => GroupTotals(
+    currency: json['currency']! as String,
+    spentCents: json['spent']! as int,
+    members: [
+      for (final m in json['members']! as List<Object?>)
+        MemberTotal.fromJson(m! as Map<String, Object?>),
+    ],
+  );
+}
+
 /// What a sync returns: the operations after `since`, and the newest seq.
 class SyncResult {
   SyncResult(this.seq, this.ops);
@@ -89,6 +130,11 @@ class ApiClient {
       for (final o in json['ops']! as List<Object?>) Op.fromJson(o! as Map<String, Object?>),
     ]);
   }
+
+  /// What the group spent, from the operations the server holds. Changes
+  /// still pending on a device are not in it until they are synced.
+  Future<GroupTotals> totals(String groupId) async =>
+      GroupTotals.fromJson(await _send('GET', '/v1/groups/${Uri.encodeComponent(groupId)}/totals'));
 
   Future<Map<String, Object?>> _send(String method, String path, [Object? body]) async {
     final http.Response response;

@@ -40,7 +40,7 @@ caches. Line counts leave out blank lines.
 | App code, not counting the shared rules | 927 lines | 1046 lines |
 | of which screens | 509 lines | 565 lines, plus a small UI kit (Material ships with Flutter) |
 | The shared rules (split, balances, settle-up, merge) | 583 lines, used by the app and the server | 466 lines, a port checked by `spec/cases.json` |
-| Tests | 9 app tests, plus 59 core and 15 server tests | 65 tests, 55 of them from `spec/cases.json` |
+| Tests | 13 app tests, plus 62 core and 18 server tests | 73 tests, 58 of them from `spec/cases.json` |
 | What the app tests sync against | The real Dart server in-process | A TypeScript copy of the server's rules |
 | Test run | about 6.5 s (`flutter test`) | about 1.8 s (`jest`) |
 | Static check | about 9.4 s (`flutter analyze`) | about 1.9 s (`tsc --noEmit`) |
@@ -117,7 +117,10 @@ start.
 `GET /v1/groups/{id}/totals` gives what the group spent and each member's
 part of it, in cents: `paid` (the expenses they paid) and `share` (their
 split shares). A transfer is not spending, so it is left out, and the `paid`
-values and the `share` values each add up to `spent`.
+values and the `share` values each add up to `spent`. Both apps read it
+with `totals(groupId)` on their API client, which gives `currency` and
+`spentCents`, plus 1 entry per member with `paidCents` and `shareCents`.
+Changes still pending on a device are not in it until they are synced.
 
 `GET /v1/groups/{id}/expenses.csv` gives the group's expenses as a CSV file
 for a spreadsheet: 1 row per expense that is not deleted, members by name,

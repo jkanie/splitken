@@ -70,12 +70,13 @@ export class FakeServer {
       this.ops.set(id, []);
       return { status: 201, body: { ...group, seq: 0 } };
     }
-    const match = /^\/v1\/groups\/([^/]+)(\/sync)?$/.exec(path);
+    const match = /^\/v1\/groups\/([^/]+)(\/sync|\/totals)?$/.exec(path);
     const group = match && this.groups.get(decodeURIComponent(match[1]));
     if (!match || !group)
       return { status: 404, body: { error: 'not_found', message: 'No group with that id.' } };
     const stored = this.ops.get(group.id)!;
     if (!match[2]) return { status: 200, body: { ...group, seq: stored.at(-1)?.seq ?? 0 } };
+    if (match[2] === '/totals') return { status: 200, body: this.totals(group, stored) };
     const newest = stored.at(-1)?.seq ?? 0;
     if (body.since > newest) {
       return {
@@ -122,6 +123,31 @@ export class FakeServer {
         seq: stored.at(-1)?.seq ?? 0,
         ops: stored.filter((op) => op.seq! > body.since),
       },
+    };
+  }
+
+  /** As the server's _totals: transfers are left out, and each share is the split of the expense. */
+  private totals(group: { currency: string; founders: Member[] }, stored: Op[]) {
+    const state = fold(group.founders, stored);
+    const paid = new Map(state.members.map((m) => [m.id, 0]));
+    const share = new Map(state.members.map((m) => [m.id, 0]));
+    let spent = 0;
+    for (const e of state.expenses.filter((e) => !e.isTransfer)) {
+      spent += e.amountCents;
+      paid.set(e.paidBy, paid.get(e.paidBy)! + e.amountCents);
+      splitExpense(e).forEach((cents, i) =>
+        share.set(e.participants[i], share.get(e.participants[i])! + cents),
+      );
+    }
+    return {
+      currency: group.currency,
+      spent,
+      members: state.members.map((m) => ({
+        id: m.id,
+        name: m.name,
+        paid: paid.get(m.id),
+        share: share.get(m.id),
+      })),
     };
   }
 }
