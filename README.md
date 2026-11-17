@@ -18,6 +18,8 @@ compared on equal terms.
 - Under each expense, the list says who paid and how it is split, such as
   "Ana paid, split 3 ways by shares" or "Ben paid, for Cy only". A
   settle-up payment shows "Settle-up payment".
+- The Members tab says how many expenses each member paid, such as "Paid
+  for 2 expenses", with settle-up payments left out.
 - Add, change, delete expenses offline. Changes wait on the device and go
   out on the next sync. 2 devices that edit offline end up with the same
   group, whatever order their changes reach the server in.
@@ -46,7 +48,7 @@ caches. Line counts leave out blank lines.
 | App code, not counting the shared rules | 927 lines | 1046 lines |
 | of which screens | 509 lines | 565 lines, plus a small UI kit (Material ships with Flutter) |
 | The shared rules (split, balances, settle-up, merge) | 583 lines, used by the app and the server | 466 lines, a port checked by `spec/cases.json` |
-| Tests | 14 app tests, plus 65 core and 18 server tests | 77 tests, 58 of them from `spec/cases.json` |
+| Tests | 15 app tests, plus 65 core and 18 server tests | 78 tests, 58 of them from `spec/cases.json` |
 | What the app tests sync against | The real Dart server in-process | A TypeScript copy of the server's rules |
 | Test run | about 6.5 s (`flutter test`) | about 1.8 s (`jest`) |
 | Static check | about 9.4 s (`flutter analyze`) | about 1.9 s (`tsc --noEmit`) |

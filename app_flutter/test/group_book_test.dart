@@ -118,6 +118,21 @@ void main() {
     expect(book.paidLine(transfer), 'Settle-up payment');
   });
 
+  test('paidCountLine counts the expenses each member paid, without settle-up payments', () async {
+    final a = await device();
+    final book = await a.create('Lunch', 'CAD', ['Ana', 'Ben', 'Cy']);
+    expect(book.paidCountLine('m1'), 'No expenses paid yet');
+    await book.saveExpense(dinner('e1', 1000));
+    expect(book.paidCountLine('m1'), 'Paid for 1 expense');
+    await book.saveExpense(dinner('e2', 600));
+    expect(book.paidCountLine('m1'), 'Paid for 2 expenses');
+    // A settle-up payment counts for no one, not even the member who paid it.
+    final t = book.settle.first;
+    await book.recordTransfer(t);
+    expect(book.paidCountLine('m1'), 'Paid for 2 expenses');
+    expect(book.paidCountLine(t.from), 'No expenses paid yet');
+  });
+
   test('an operation the server refuses is dropped and the rest are sent', () async {
     final a = await device();
     final book = await a.create('Club', 'CAD', ['Ana', 'Ben', 'Cy']);

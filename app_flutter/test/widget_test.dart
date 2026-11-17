@@ -75,6 +75,11 @@ void main() {
     expect(find.text('Paid 0.00, share 2.50'), findsNWidgets(2));
     expect(find.text('Ben pays Ana'), findsOneWidget);
     expect(find.text('Cy pays Ana'), findsOneWidget);
+
+    await tester.tap(find.text('Members'));
+    await tester.pumpAndSettle();
+    expect(find.text('Paid for 1 expense'), findsOneWidget);
+    expect(find.text('No expenses paid yet'), findsNWidgets(2));
   });
 
   testWidgets('the home screen with no groups', (tester) async {

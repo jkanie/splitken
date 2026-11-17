@@ -78,6 +78,13 @@ export class GroupBook {
     return this.state.members.find((m) => m.id === id)?.name ?? id;
   }
 
+  /** The line under a member on the Members tab: how many expenses they paid, settle-up payments left out. */
+  paidCountLine(memberId: string): string {
+    const n = this.state.expenses.filter((e) => !e.isTransfer && e.paidBy === memberId).length;
+    if (n === 0) return 'No expenses paid yet';
+    return n === 1 ? 'Paid for 1 expense' : `Paid for ${n} expenses`;
+  }
+
   /**
    * The line under an expense in the list: who paid and how it is split, such as "Ana paid, split 3 ways by shares".
    * A settle-up payment names itself, since its description already says who paid whom.

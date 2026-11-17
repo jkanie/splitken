@@ -62,6 +62,17 @@ class GroupBook extends ChangeNotifier {
   String memberName(String id) =>
       _state.members.where((m) => m.id == id).map((m) => m.name).firstOrNull ?? id;
 
+  /// The line under a member on the Members tab: how many expenses they
+  /// paid, settle-up payments left out, such as "Paid for 2 expenses".
+  String paidCountLine(String memberId) {
+    final n = _state.expenses.where((e) => !e.isTransfer && e.paidBy == memberId).length;
+    return switch (n) {
+      0 => 'No expenses paid yet',
+      1 => 'Paid for 1 expense',
+      _ => 'Paid for $n expenses',
+    };
+  }
+
   /// The line under an expense in the list: who paid and how it is split,
   /// such as "Ana paid, split 3 ways by shares". A settle-up payment names
   /// itself, since its description already says who paid whom.

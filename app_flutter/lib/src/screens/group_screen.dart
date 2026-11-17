@@ -171,7 +171,8 @@ class _MembersState extends State<_Members> {
   Widget build(BuildContext context) {
     return ListView(
       children: [
-        for (final m in widget.book.state.members) ListTile(title: Text(m.name)),
+        for (final m in widget.book.state.members)
+          ListTile(title: Text(m.name), subtitle: Text(widget.book.paidCountLine(m.id))),
         Padding(
           padding: const EdgeInsets.all(16),
           child: Row(

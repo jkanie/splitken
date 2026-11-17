@@ -102,6 +102,20 @@ test('paidLine says who paid and how the expense is split', async () => {
   expect(book.paidLine(transfer)).toBe('Settle-up payment');
 });
 
+test('paidCountLine counts the expenses each member paid, without settle-up payments', async () => {
+  const book = await (await device()).create('Lunch', 'CAD', ['Ana', 'Ben', 'Cy']);
+  expect(book.paidCountLine('m1')).toBe('No expenses paid yet');
+  await book.saveExpense(dinner('e1', 1000));
+  expect(book.paidCountLine('m1')).toBe('Paid for 1 expense');
+  await book.saveExpense(dinner('e2', 600));
+  expect(book.paidCountLine('m1')).toBe('Paid for 2 expenses');
+  // A settle-up payment counts for no one, not even the member who paid it.
+  const t = book.settle[0];
+  await book.recordTransfer(t);
+  expect(book.paidCountLine('m1')).toBe('Paid for 2 expenses');
+  expect(book.paidCountLine(t.from)).toBe('No expenses paid yet');
+});
+
 test('an operation the server refuses is dropped and the rest are sent', async () => {
   const book = await (await device()).create('Club', 'CAD', ['Ana', 'Ben', 'Cy']);
   await book.saveExpense(dinner('e1', 300));

@@ -56,6 +56,10 @@ test('add an expense, see the split, then the settle-up', async () => {
   expect(screen.getAllByText('Paid 0.00, share 2.50')).toHaveLength(2);
   expect(screen.getByText('Ben pays Ana')).toBeOnTheScreen();
   expect(screen.getByText('Cy pays Ana')).toBeOnTheScreen();
+
+  await fireEvent.press(screen.getByText('Members'));
+  expect(screen.getByText('Paid for 1 expense')).toBeOnTheScreen();
+  expect(screen.getAllByText('No expenses paid yet')).toHaveLength(2);
 });
 
 test('the home screen with no groups', async () => {

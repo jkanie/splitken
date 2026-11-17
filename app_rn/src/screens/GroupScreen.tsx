@@ -141,7 +141,10 @@ function Members({ book }: { book: GroupBook }) {
     <View>
       {book.state.members.map((m) => (
         <Row key={m.id}>
-          <Text>{m.name}</Text>
+          <View style={styles.grow}>
+            <Text>{m.name}</Text>
+            <Text style={styles.muted}>{book.paidCountLine(m.id)}</Text>
+          </View>
         </Row>
       ))}
       <View style={{ padding: 16 }}>
